@@ -35,7 +35,7 @@ DE101 = DE10.DE10()
 #controller = Controller.Controller('/dev/ttyUSB1')
 
 # 精密カウンターでメインループを0.1秒おきに回す
-last_counter = time.process_time()
+last_counter = time.time()
 
 while True:
     #mascon_level = mascon_shared.value
@@ -45,9 +45,9 @@ while True:
     DE101.setBrake(brake_level)
     
     # 0.1秒経過するまでwaitする
-    while (time.process_time() < last_counter + 0.1):
-        pass
-    last_counter = time.process_time()
+    while (time.time() < last_counter + 0.1):
+        time.sleep(0.001)
+    last_counter = time.time()
     
     DE101.advanceTime()
     print(DE101.getBp())
