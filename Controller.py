@@ -2,13 +2,20 @@
 
 import serial
 
+"""
+鉄道車両の動く速度(m/s)を受け取って、自作のPWMコントローラへ動く命令をするモジュール
+"""
 class Controller:
     def __init__(self, device):
         # 2回に一回書き込む
         self.write_count = False
         self.device = serial.Serial(device, baudrate=9600)
         
-    # speed: m/s
+
+    """
+    speed: m/s (実際の車両の)
+    PWMコントローラへは "!" ~ "\xff"までを渡す
+    """
     def move(self, speed):
         # 動き始める速度
         base_power = 42
@@ -26,8 +33,8 @@ class Controller:
         else:
             output_power = (speed * magnify_2) + (criteria * magnify_1) + base_power
             
-        if output_power > 255:
-            output_power = 255
+        if (output_power + base_power) > 255:
+            output_power = 255 - base_power
         
         if self.write_count == True:
             self.write_count = False
