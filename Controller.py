@@ -2,21 +2,24 @@
 
 import serial
 
-"""
-鉄道車両の動く速度(m/s)を受け取って、自作のPWMコントローラへ動く命令をするモジュール
-"""
 class Controller:
+    """
+    鉄道車両の動く速度(m/s)を受け取って、自作のPWMコントローラへ動く命令をするモジュール
+    """
     def __init__(self, device):
         # 2回に一回書き込む
         self.write_count = False
         self.device = serial.Serial(device, baudrate=9600)
         
-
-    """
-    speed: m/s (実際の車両の)
-    PWMコントローラへは "!" ~ "\xff"までを渡す
-    """
     def move(self, speed):
+        """
+        PWMコントローラへは "!" ~ "\xff"までを渡す
+        
+        Parameters
+        ----------
+        speed : int
+            実際の鉄道車両の速度(m/s)
+        """
         # 動き始める速度
         base_power = 42
         
