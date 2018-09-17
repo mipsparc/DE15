@@ -38,7 +38,6 @@ last_counter = time.time()
 
 while True:
     mascon_level = mascon_shared.value
-    mascon_level = 14
     brake_level = brake_shared.value
     
     DE101.setMascon(mascon_level)
@@ -51,6 +50,5 @@ while True:
     
     DE101.advanceTime()
     speed = DE101.getSpeed()
-    print(speed * 3600 / 1000)
     
     controller.move(speed)
