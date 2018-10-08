@@ -15,6 +15,8 @@ class DE10:
         self.eb = False
         #貨車牽引時の加速度減少(単機: 1)
         self.freight = 0.8
+        #統合モジュールのボタン状態(intでビット列)
+        self.buttons = 0
 
     # 0.1秒進める
     def advanceTime(self):
@@ -76,3 +78,25 @@ class DE10:
     # ブレーキ管圧力は通常490kPa 140kPa減圧して350kPaになると最大がかかる
     def getBp(self):
         return 490 - (self.bc / self.BC_MAX) * 140
+        
+    def setButtons(self, buttons):
+        self.buttons = buttons
+        
+    # 0(切),1,2の3つの方向を返す
+    def getWay(self):
+        return (self.buttons & 0b11000000) >> 6
+    
+    # ホーン状態をboolで返す
+    def isHoneEnabled(self):
+        return bool(self.buttons & 0b00100000)
+    
+    # 入換・本線スイッチ状態をboolで返す
+    def isHonsenEnabled(self):
+        return bool(self.buttons & 0b00010000)
+    
+    # 鍵スイッチ状態をboolで返す
+    def isKeyEnabled(self):
+        return bool(self.buttons & 0b00001000)
+
+        
+    
