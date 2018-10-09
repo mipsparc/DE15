@@ -19,6 +19,7 @@ class ReadBrake:
             raw_brake, buttons, x = line.split(b',')
             
             raw_brake = int(raw_brake)
+            buttons = int(buttons)
             
             if raw_brake > self.max_raw_brake:
                 raw_brake = self.max_raw_brake
