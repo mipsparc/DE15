@@ -60,11 +60,6 @@ while True:
         DE101.setBrake(brake_level)
         DE101.setButtons(buttons)
         
-        # 0.1秒経過するまでwaitする
-        while (time.time() < last_counter + 0.1):
-            time.sleep(0.001)
-        last_counter = time.time()
-        
         DE101.advanceTime()
         speed = DE101.getSpeed()
         
@@ -110,6 +105,12 @@ while True:
         
         print(speed * 3600 / 1000)
         controller.move(speed, DE101.getWay())
+        
+        # 0.1秒経過するまでwaitする
+        while (time.time() < last_counter + 0.1):
+            time.sleep(0.001)
+        last_counter = time.time()
+        
     except KeyboardInterrupt:
         controller.move(0)
         raise
