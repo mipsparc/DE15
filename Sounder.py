@@ -5,16 +5,25 @@ class Sounder:
     def __init__(self):
         pygame.mixer.pre_init(44100, -16, 1, 512)
         pygame.init()
-        self.idle = pygame.mixer.Sound('sound/idle.wav')
-        self.idle.set_volume(1)
+        self.idle = LoopSounds(['sound/idle.wav'])
+        self.idle.volume(0.4)
         self.switch = pygame.mixer.Sound('sound/switch.wav')
-        self.brake = pygame.mixer.Sound('sound/brake.wav')
+        self.brake = LoopSounds(['sound/brake.wav'])
         self.hone = pygame.mixer.Sound('sound/hone.wav')
-        self.run = pygame.mixer.Sound('sound/run.wav')
-        self.run.set_volume(0.3)
-        self.power1 = pygame.mixer.Sound('sound/power1.wav')
-        self.power2 = pygame.mixer.Sound('sound/power2.wav')
-        self.power3 = pygame.mixer.Sound('sound/power3.wav')
+        self.run = LoopSounds([
+            'sound/run0.wav',
+            'sound/run1.wav',
+            'sound/run2.wav',
+            'sound/run3.wav',
+            'sound/run4.wav',
+            'sound/run5.wav',
+        ])
+        self.power = LoopSounds([
+            'sound/power1.wav',
+            'sound/power2.wav',
+            'sound/power3.wav',
+        ])
+        self.power.volume(0.4)
 
         
     def Hone(self):
@@ -22,40 +31,23 @@ class Sounder:
     
     def Switch(self):
         self.switch.play()
+
+class LoopSounds:
+    def __init__(self, paths):
+        self.sound = []
+        for path in paths:
+            self.sound.append(pygame.mixer.Sound(path))
         
-    def Idle(self, stop=False):
-        if not stop:
-            self.idle.play(loops=-1)
-        else:
-            self.idle.stop()
-        
-    def Run(self, stop=False):
-        if not stop:
-            self.run.play(loops=-1)
-        else:
-            self.run.stop()
+    def stopAll(self):
+        for stop_num in range(len(self.sound)):
+            self.stop(stop_num)
             
-    def Brake(self, stop=False):
-        if not stop:
-            self.brake.play(loops=-1)
-        else:
-            self.brake.stop()
+    def play(self, num):
+        self.sound[num].play(loops=-1)
         
-    def Power1(self, stop=False):
-        if not stop:
-            self.power1.play(loops=-1)    
-        else:
-            self.power1.stop()
+    def stop(self, num):
+        self.sound[num].stop()
         
-    def Power2(self, stop=False):
-        if not stop:
-            self.power2.play(loops=-1)
-        else:
-            self.power2.stop()
-        
-    def Power3(self, stop=False):
-        if not stop:
-            self.power3.play(loops=-1)
-        else:
-            self.power3.stop()
-        
+    def volume(self, v):
+        for s in self.sound:
+            s.set_volume(v)

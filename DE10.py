@@ -8,13 +8,13 @@ class DE10:
         # ブレーキシリンダ圧力(減速度)
         self.bc = 0
         # 最大ブレーキシリンダ圧力
-        self.BC_MAX = 5.0
+        self.BC_MAX = 3.0
         # ブレーキレバー位置(ブレーキシリンダ圧力に作用)
         self.brake_level = 0
         #非常ブレーキ状態
         self.eb = False
         #貨車牽引時の加速度減少(単機: 1)
-        self.freight = 0.8
+        self.freight = 0.6
         #統合モジュールのボタン状態(intでビット列)
         self.buttons = 0
 
@@ -52,13 +52,13 @@ class DE10:
 
         # 非常ブレーキ
         if self.eb:
-            self.setBrake(1)
+            self.bc = self.BC_MAX
             self.setMascon(0)
             # 十分に低速になったら自動で復位
-            if self.speed < 1.5:
+            if self.speed < 1:
                 self.eb = False
                 self.setBrake(0)
-                self.bc = 1
+                self.bc = 0
 
     def getSpeed(self):
         return self.speed
