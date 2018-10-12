@@ -35,7 +35,7 @@ brake_process = Process(target=ReadBrakeWorker, args=(brake_shared, buttons_shar
 brake_process.start()
 
 DE101 = DE10.DE10()
-#controller = Controller.Controller('/dev/ttyUSB2')
+controller = Controller.Controller('/dev/ttyUSB0')
 
 Sound = Sounder.Sounder()
 Sound.idle.play(0)
@@ -55,8 +55,10 @@ last_brake = False
 while True:
     try:
         mascon_level = mascon_shared.value
+        #mascon_level = 6
         brake_level = brake_shared.value
         buttons = buttons_shared.value
+        #buttons = 136
         
         DE101.setMascon(mascon_level)
         DE101.setBrake(brake_level)
@@ -68,6 +70,7 @@ while True:
         if (last_hone < time.time() - 3) and DE101.isHoneEnabled():
             last_hone = time.time()
             Sound.Hone()
+            pass
             
         if (brake_level < 0 and not last_brake) or (DE101.eb and not last_brake):
             last_brake = True
@@ -82,7 +85,7 @@ while True:
             
         kph = speed * 3600 / 1000
         
-        if not DE101.isKeyEnabled():
+        if (not DE101.isKeyEnabled()) or (DE101.getWay == 0):
             DE101.eb = True
             
         if kph == 0:
@@ -122,7 +125,7 @@ while True:
         last_mascon_level = mascon_level
 
         speed_shared.value = int(kph)
-        print(kph)
+        print('{}km/h, BP: {}, BC: {}'.format(int(kph), DE101.getBp(), DE101.bc))
         controller.move(speed, DE101.getWay(), DE101.isHonsenEnabled())
         
         # 0.1秒経過するまでwaitする

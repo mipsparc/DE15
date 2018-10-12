@@ -65,7 +65,6 @@ class Controller:
             else:
                 self._write(bytes([ord('!') + int(output_power)]))
 
-            print(str(speed * 3600 / 1000) + 'km/h')
         else:
             self.write_count = True
             
