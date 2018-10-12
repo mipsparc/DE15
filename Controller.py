@@ -12,7 +12,7 @@ class Controller:
         self.device = serial.Serial(device, baudrate=9600)
         self.way = 1
         
-    def move(self, speed, way):
+    def move(self, speed, way, honsen):
         """
         PWMコントローラへは走行時は "!" ~ "\xff"までを渡す
         
@@ -35,7 +35,10 @@ class Controller:
             return
         
         # 動き始める速度
-        base_power = 42
+        if honsen:
+            base_power = 40
+        else:
+            base_power = 35
         
         #出力値の傾き
         magnify_1 = 1.0

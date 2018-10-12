@@ -80,7 +80,10 @@ while True:
             last_way = DE101.getWay()
             Sound.Switch()
             
-        kph = speed * 3600 / 1000    
+        kph = speed * 3600 / 1000
+        
+        if not DE101.isKeyEnabled():
+            DE101.eb = True
             
         if kph == 0:
             Sound.run.stopAll()
@@ -120,7 +123,7 @@ while True:
 
         speed_shared.value = int(kph)
         print(kph)
-        controller.move(speed, DE101.getWay())
+        controller.move(speed, DE101.getWay(), DE101.isHonsenEnabled())
         
         # 0.1秒経過するまでwaitする
         while (time.time() < last_counter + 0.1):
@@ -128,7 +131,7 @@ while True:
         last_counter = time.time()
         
     except KeyboardInterrupt:
-        controller.move(0)
+        controller.move(0, 0, False)
         raise
         
 
