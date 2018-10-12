@@ -22,6 +22,8 @@ class Controller:
             実際の鉄道車両の速度(m/s)
         way : int
             方向 0切, 1位, 2位
+        honsen: bool
+            Falseであれば低速性能を強化する
         """
         
         # 切
