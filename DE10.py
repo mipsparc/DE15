@@ -19,7 +19,7 @@ class DE10:
         self.buttons = 0
 
     # 0.1秒進める
-    def advanceTime(self):
+    def advanceTime(self, honsen):
         # 加速度を求める(m/s2)
         if self.speed < 12:
             accel = self.mascon_level / 14.0 * 0.803
@@ -32,8 +32,11 @@ class DE10:
         elif 45 <= self.speed:
             accel = self.mascon_level / 14.0 * 0.194
         
-        # 0.1秒あたりのブレーキレバー作用(max ±1.5m/s3) ここは実物に則さない
-        self.bc += self.brake_level * 1.5 * 0.1
+        # 0.1秒あたりのブレーキレバー作用(max ±1.9m/s3) ここは実物に則さない
+        if honsen:
+            self.bc += self.brake_level * 1.9 * 0.1
+        else:
+            self.bc += self.brake_level * 2.3 * 0.1
         
         # 減速度(m/s2 max ±5.0m/s2) ここは実物に則さない
         if self.bc < 0:
@@ -46,8 +49,8 @@ class DE10:
         if self.speed < 0:
             self.speed = 0
             
-        # OSR 98km/hを超えると非常ブレーキ
-        if self.speed > 27.2:
+        # OSR 98km/h(入換でATS 30km/h)を超えると非常ブレーキ
+        if self.speed > 27.2 or (honsen and self.speed > 8.3):
             self.eb = True
 
         # 非常ブレーキ
@@ -58,7 +61,6 @@ class DE10:
             if self.speed < 1:
                 self.eb = False
                 self.setBrake(0)
-                self.bc = 0
 
     def getSpeed(self):
         return self.speed

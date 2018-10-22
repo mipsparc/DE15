@@ -40,7 +40,7 @@ class Controller:
         if honsen:
             base_power = 40
         else:
-            base_power = 35
+            base_power = 39
         
         #出力値の傾き
         magnify_1 = 1.0

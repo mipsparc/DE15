@@ -11,10 +11,15 @@ class ReadBrake:
         self.ser = serial.Serial(device, baudrate=9600)
         
         # 設定する
-        self.max_raw_brake = 31000.0
+        self.max_raw_brake = 48000.0
         
         # 10km/h ごとの出力値テーブル
         self.speed_table = [0, 25, 54, 82, 112, 146, 178, 211, 244, 255]
+
+    def showRawBrake(self):
+        line = self.ser.readline()
+        raw_brake, buttons, x = line.split(b',')
+        print(raw_brake)
 
     def waitAndGetData(self):
         self.ser.reset_input_buffer()
@@ -62,5 +67,5 @@ class ReadBrake:
 if __name__ == '__main__':
     brake = ReadBrake('/dev/ttyUSB0')
     while True:
-        print(brake.waitAndGetBrake())
+        print(brake.waitAndGetData())
         

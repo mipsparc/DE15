@@ -20,8 +20,9 @@ mascon_process = Process(target=ReadMasconWorker, args=(mascon_shared, '/dev/tty
 mascon_process.start()
 
 # ブレーキ読み込みプロセス起動
-def ReadBrakeWorker(brake_shared, buttons_shared, speed_shared, device):    
+def ReadBrakeWorker(brake_shared, buttons_shared, speed_shared, device):
     brake = BrakeReader.ReadBrake(device)
+    brake.showRawBrake()
     while True:
         brake_level, buttons = brake.waitAndGetData()
         brake_shared.value = brake_level
@@ -35,7 +36,7 @@ brake_process = Process(target=ReadBrakeWorker, args=(brake_shared, buttons_shar
 brake_process.start()
 
 DE101 = DE10.DE10()
-controller = Controller.Controller('/dev/ttyUSB0')
+controller = Controller.Controller('/dev/ttyUSB2')
 
 Sound = Sounder.Sounder()
 Sound.idle.play(0)
@@ -64,7 +65,7 @@ while True:
         DE101.setBrake(brake_level)
         DE101.setButtons(buttons)
         
-        DE101.advanceTime()
+        DE101.advanceTime(DE101.isHonsenEnabled())
         speed = DE101.getSpeed()
         
         if (last_hone < time.time() - 3) and DE101.isHoneEnabled():
@@ -72,10 +73,10 @@ while True:
             Sound.Hone()
             pass
             
-        if (brake_level < 0 and not last_brake) or (DE101.eb and not last_brake):
+        if brake_level > 0 and not last_brake and DE101.bc < DE101.BC_MAX:
             last_brake = True
             Sound.brake.play(0)
-        elif brake_level >= 0 and not DE101.eb:
+        elif brake_level <= 0 or DE101.bc <= 0 or DE101.bc >= DE101.BC_MAX:
             last_brake = False
             Sound.brake.stop(0)
             
@@ -85,7 +86,7 @@ while True:
             
         kph = speed * 3600 / 1000
         
-        if (not DE101.isKeyEnabled()) or (DE101.getWay == 0):
+        if (not DE101.isKeyEnabled()) or (DE101.getWay() == 0):
             DE101.eb = True
             
         if kph == 0:
@@ -125,7 +126,7 @@ while True:
         last_mascon_level = mascon_level
 
         speed_shared.value = int(kph)
-        print('{}km/h, BP: {}, BC: {}'.format(int(kph), DE101.getBp(), DE101.bc))
+        print('{}km/h, BP: {}, BC: {}, EB: {}'.format(int(kph), int(DE101.getBp()), int(DE101.bc), DE101.eb))
         controller.move(speed, DE101.getWay(), DE101.isHonsenEnabled())
         
         # 0.1秒経過するまでwaitする
