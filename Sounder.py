@@ -24,6 +24,7 @@ class Sounder:
             'sound/power3.wav',
         ])
         self.power.volume(0.4)
+        self.irekae = LoopSounds(['sound/irekae.wav'])
 
         
     def Hone(self):
