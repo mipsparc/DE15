@@ -3,7 +3,7 @@ import pygame
 
 class Sounder:
     def __init__(self):
-        pygame.mixer.pre_init(44100, -16, 1, 512)
+        pygame.mixer.pre_init(44100, -16, 1, 1024)
         pygame.init()
         self.idle = LoopSounds(['sound/idle.wav'])
         self.idle.volume(0.4)
@@ -25,8 +25,11 @@ class Sounder:
         ])
         self.power.volume(0.4)
         self.irekae = LoopSounds(['sound/irekae.wav'])
+        self.irekae.volume(0.6)
         self.sekkin = pygame.mixer.Sound('sound/sekkin.wav')
+        self.sekkin.set_volume(0.8)
         self.dream = LoopSounds(['sound/dream_park.wav'])
+        self.dream.volume(0.7)
         self.door_announce = pygame.mixer.Sound('sound/door_announce.wav')
         
     def Hone(self):

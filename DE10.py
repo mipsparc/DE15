@@ -49,8 +49,8 @@ class DE10:
         if self.speed < 0:
             self.speed = 0
             
-        # OSR 98km/h(入換でATS 30km/h)を超えると非常ブレーキ
-        if self.speed > 27.2 or (honsen and self.speed > 8.3):
+        # OSR 98km/hを超えると非常ブレーキ
+        if self.speed > 27.2:
             self.eb = True
 
         # 非常ブレーキ

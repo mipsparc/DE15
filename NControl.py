@@ -24,19 +24,22 @@ def ReadBrakeWorker(brake_shared, buttons_shared, speed_shared, device):
     brake = BrakeReader.ReadBrake(device)
     brake.showRawBrake()
     while True:
-        brake_level, buttons = brake.waitAndGetData()
-        brake_shared.value = brake_level
-        buttons_shared.value = buttons
-        brake.setSpeed(speed_shared.value)
+        try:
+            brake_level, buttons = brake.waitAndGetData()
+            brake_shared.value = brake_level
+            buttons_shared.value = buttons
+            brake.setSpeed(speed_shared.value)
+        except:
+            pass
 
 brake_shared = Value('f', 0.0)
 buttons_shared = Value('i', 0)
 speed_shared = Value('i', 0)
-brake_process = Process(target=ReadBrakeWorker, args=(brake_shared, buttons_shared, speed_shared, '/dev/ttyUSB0'))
+brake_process = Process(target=ReadBrakeWorker, args=(brake_shared, buttons_shared, speed_shared, '/dev/ttyUSB2'))
 brake_process.start()
 
 DE101 = DE10.DE10()
-controller = Controller.Controller('/dev/ttyUSB2')
+controller = Controller.Controller('/dev/controller')
 
 Sound = Sounder.Sounder()
 Sound.idle.play(0)
@@ -126,7 +129,10 @@ while True:
         last_mascon_level = mascon_level
 
         speed_shared.value = int(kph)
-        print('{}km/h, BP: {}, BC: {}, EB: {}'.format(int(kph), int(DE101.getBp()), int(DE101.bc), DE101.eb))
+        if not DE101.eb:
+            print('BP: {}, BC: {}'.format(int(DE101.getBp()), int(490 - DE101.getBp())))
+        else:
+            print('EB BP: {}, BC: {}'.format(int(DE101.getBp()), int(490 - DE101.getBp())))
         controller.move(speed, DE101.getWay(), DE101.isHonsenEnabled())
         
         # 0.1秒経過するまでwaitする
