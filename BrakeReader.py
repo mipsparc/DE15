@@ -39,11 +39,11 @@ class ReadBrake:
             raw_brake = self.max_raw_brake
         brake = ((raw_brake * 2) / self.max_raw_brake) - 1.0
         brake = -brake
-        if random.randrange(10) == 0:
+        if random.randrange(30) == 0:
             print(self.max_raw_brake)
     
         # 遊びを設ける
-        if -0.2 < brake < 0.2:
+        if -0.3 < brake < 0.3:
             brake = 0.0
 
         return brake, buttons

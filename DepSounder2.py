@@ -9,13 +9,13 @@ play = False
 while True:
     input()
     if not play:
-        print("ドリームパークplaying... Enterで停止")
-        s.dream.play(0)
+        print("See you again playing... Enterで停止")
+        s.dep.play(0)
         play = True
     else:
-        s.dream.stop(0)
+        s.dep.stop(0)
         time.sleep(0.3)
         s.DoorAnnounce()
         time.sleep(5)
-        print("ドリームパークstopped... Enterで再生")
+        print("See you again stopped... Enterで再生")
         play = False

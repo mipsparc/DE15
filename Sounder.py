@@ -30,6 +30,7 @@ class Sounder:
         self.sekkin.set_volume(0.8)
         self.dream = LoopSounds(['sound/dream_park.wav'])
         self.dream.volume(0.7)
+        self.dep = LoopSounds(['sound/dep_sound.wav'])
         self.door_announce = pygame.mixer.Sound('sound/door_announce.wav')
         
     def Hone(self):

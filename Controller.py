@@ -44,8 +44,8 @@ class Controller:
             base_power = 47
         
         #出力値の傾き
-        magnify_1 = 1.8
-        magnify_2 = 1.7
+        magnify_1 = 2.2
+        magnify_2 = 2.0
         
         #傾きが変化する閾値
         criteria = 5.5
