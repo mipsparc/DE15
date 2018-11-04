@@ -79,7 +79,7 @@ while True:
         if brake_level != 0 and not last_brake and 0 < DE101.bc < DE101.BC_MAX:
             last_brake = True
             Sound.brake.play(0)
-        elif brake_level == 0 or DE101.bc <= 0 or DE101.BC_MAX <= DE101.bc:
+        elif brake_level == 0 or not 0 < DE101.bc < DE101.BC_MAX:
             last_brake = False
             Sound.brake.stop(0)
             
