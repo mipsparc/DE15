@@ -76,10 +76,10 @@ while True:
             Sound.Hone()
             pass
             
-        if brake_level > 0 and not last_brake and DE101.bc < DE101.BC_MAX:
+        if brake_level != 0 and not last_brake and 0 < DE101.bc < DE101.BC_MAX:
             last_brake = True
             Sound.brake.play(0)
-        elif brake_level <= 0 or DE101.bc <= 0 or DE101.bc >= DE101.BC_MAX:
+        elif brake_level == 0 or DE101.bc <= 0 or DE101.BC_MAX <= DE101.bc:
             last_brake = False
             Sound.brake.stop(0)
             
@@ -132,7 +132,7 @@ while True:
         if not DE101.eb:
             print('BP: {}, BC: {}'.format(int(DE101.getBp()), int(490 - DE101.getBp())))
         else:
-            print('EB BP: {}, BC: {}'.format(int(DE101.getBp()), int(490 - DE101.getBp())))
+            print('EB, BC: {}'.format(int(DE101.getBp()), int(490 - DE101.getBp())))
         controller.move(speed, DE101.getWay(), DE101.isHonsenEnabled())
         
         # 0.1秒経過するまでwaitする
