@@ -39,13 +39,13 @@ class Controller:
         # 動き始める速度
         if honsen:
             #base_power = 46
-            base_power = 52
+            base_power = 55
         else:
             base_power = 47
         
         #出力値の傾き
         magnify_1 = 2.2
-        magnify_2 = 2.0
+        magnify_2 = 2.2
         
         #傾きが変化する閾値
         criteria = 5.5

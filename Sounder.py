@@ -3,7 +3,7 @@ import pygame
 
 class Sounder:
     def __init__(self):
-        pygame.mixer.pre_init(44100, -16, 1, 1024)
+        pygame.mixer.pre_init(44100, -16, 1, 2048)
         pygame.init()
         self.idle = LoopSounds(['sound/idle.wav'])
         self.idle.volume(0.4)

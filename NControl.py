@@ -16,7 +16,7 @@ def ReadMasconWorker(mascon_shared, device):
         mascon_shared.value = mascon_level
 
 mascon_shared = Value('i', 0)
-mascon_process = Process(target=ReadMasconWorker, args=(mascon_shared, '/dev/ttyUSB1'))
+mascon_process = Process(target=ReadMasconWorker, args=(mascon_shared, '/dev/ttyUSB2'))
 mascon_process.start()
 
 # ブレーキ読み込みプロセス起動
@@ -35,7 +35,7 @@ def ReadBrakeWorker(brake_shared, buttons_shared, speed_shared, device):
 brake_shared = Value('f', 0.0)
 buttons_shared = Value('i', 0)
 speed_shared = Value('i', 0)
-brake_process = Process(target=ReadBrakeWorker, args=(brake_shared, buttons_shared, speed_shared, '/dev/ttyUSB2'))
+brake_process = Process(target=ReadBrakeWorker, args=(brake_shared, buttons_shared, speed_shared, '/dev/ttyUSB1'))
 brake_process.start()
 
 DE101 = DE10.DE10()
