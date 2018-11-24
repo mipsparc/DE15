@@ -17,14 +17,16 @@ class ReadBrake:
         self.speed_table = [0, 25, 54, 82, 112, 146, 178, 211, 244, 255]
 
     def showRawBrake(self):
-        try:
-            while True:
+        while True:
+            try:
                 line = self.ser.readline()
                 raw_brake, buttons, x = line.split(b',')
                 print(raw_brake)
                 break
-        except:
-            pass
+            except KeyboardInterrupt:
+                exit()
+            except:
+                pass
 
     def waitAndGetData(self):
         self.ser.reset_input_buffer()
