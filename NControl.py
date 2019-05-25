@@ -9,6 +9,9 @@ import Sounder
 from multiprocessing import Process, Value
 import time
 
+mascon_port = input('mascon>')
+brake_port = input('brake>')
+
 ## マスコン読み込みプロセス起動
 def ReadMasconWorker(mascon_shared, device):    
     mascon = MasconReader.ReadMascon(device)
@@ -17,7 +20,7 @@ def ReadMasconWorker(mascon_shared, device):
         mascon_shared.value = mascon_level
 
 mascon_shared = Value('i', 0)
-mascon_process = Process(target=ReadMasconWorker, args=(mascon_shared, '/dev/ttyUSB2'))
+mascon_process = Process(target=ReadMasconWorker, args=(mascon_shared, mascon_port))
 mascon_process.start()
 
 # ブレーキ読み込みプロセス起動
@@ -36,11 +39,11 @@ def ReadBrakeWorker(brake_shared, buttons_shared, speed_shared, device):
 brake_shared = Value('f', 0.0)
 buttons_shared = Value('i', 0)
 speed_shared = Value('i', 0)
-brake_process = Process(target=ReadBrakeWorker, args=(brake_shared, buttons_shared, speed_shared, '/dev/ttyUSB1'))
+brake_process = Process(target=ReadBrakeWorker, args=(brake_shared, buttons_shared, speed_shared, brake_port))
 brake_process.start()
 
 DE101 = DE10.DE10()
-controller = Controller.Controller('/dev/controller')
+controller = Controller.Controller('/dev/ttyUSB2')
 
 Sound = Sounder.Sounder()
 Sound.idle.play(0)
@@ -130,6 +133,7 @@ while True:
         last_mascon_level = mascon_level
 
         speed_shared.value = int(kph)
+        
         if not DE101.eb:
             print('BP: {}, BC: {}'.format(int(DE101.getBp()), int(490 - DE101.getBp())))
         else:

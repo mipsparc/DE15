@@ -39,13 +39,13 @@ class Controller:
         # 動き始める速度
         if honsen:
             #base_power = 46
-            base_power = 55
+            base_power = 50
         else:
             base_power = 47
         
         #出力値の傾き
         magnify_1 = 2.2
-        magnify_2 = 2.2
+        magnify_2 = 2.0
         
         #傾きが変化する閾値
         criteria = 5.5
@@ -72,3 +72,11 @@ class Controller:
     def _write(self,output_power):
         # 2回連続でないと受領しないため、3回連続で送る
         self.device.write(output_power * 3)
+
+if __name__ == '__main__':
+    controller = Controller('/dev/controller')
+    while True:
+        speed = int(input('speed>'))
+        way = int(input('way>'))
+        honsen = int(input('honsen>'))
+        controller.move(speed, way, honsen)
