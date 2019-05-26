@@ -24,23 +24,9 @@ class Sounder:
             'sound/power3.wav',
         ])
         self.power.volume(0.4)
-        self.irekae = LoopSounds(['sound/irekae.wav'])
-        self.irekae.volume(0.6)
-        self.sekkin = pygame.mixer.Sound('sound/sekkin.wav')
-        self.sekkin.set_volume(0.8)
-        self.dream = LoopSounds(['sound/dream_park.wav'])
-        self.dream.volume(0.7)
-        self.dep = LoopSounds(['sound/dep_sound.wav'])
-        self.door_announce = pygame.mixer.Sound('sound/door_announce.wav')
     
     def Switch(self):
         self.switch.play()
-        
-    def Sekkin(self):
-        self.sekkin.play()
-        
-    def DoorAnnounce(self):
-        self.door_announce.play()
 
 class LoopSounds:
     def __init__(self, paths):
