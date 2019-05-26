@@ -88,10 +88,6 @@ class DE10:
     def getWay(self):
         return (self.buttons & 0b11000000) >> 6
     
-    # ホーン状態をboolで返す(ホーンスイッチがNCのため逆論理)
-    def isHoneEnabled(self):
-        return bool(not(self.buttons & 0b00100000))
-    
     # 入換・本線スイッチ状態をboolで返す
     def isHonsenEnabled(self):
         return bool(self.buttons & 0b00010000)

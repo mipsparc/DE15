@@ -1,5 +1,5 @@
 # 概要
-このソフトウェア群は、鉄道模型を実際の運転台部品で制御し、実物の音が同時に鳴るシミュレータです。
+このソフトウェア群は、鉄道模型を実際の運転台部品で制御し、実物の音が同時に鳴るシステムです。
 
 # 構成
 ## MasconReader.py
@@ -17,6 +17,13 @@
 ## BrakeReader.py
 ブレーキ統合ユニットからブレーキハンドルの角度と各種ボタン操作を受け取って、速度計に速度情報を渡す
 
-# 起動方法
-1. NControl.py内にハードコートされたデバイスファイル名を実際のものに書き換える
-1. /dev/ttyUSBxに読み書きできる権限がある状態で、NControl.pyを起動する (rootは非推奨)
+## SoundManager.py
+Sounderを制御する
+
+# 新しいUbuntu系Linux搭載コンピュータで動かす環境構築
+- sudo apt install python3 python3-pygame python3-serial
+- python3 NControl.py brake mascon controller で単体起動試験をする
+- udevの設定をして、デバイスに読み書き権限があるようにする。/dev/mascon, /dev/brake, /dev/controller に各デバイスを割り当てる
+- コンピュータを再起動する
+- screenコマンドなどで各デバイスの動作を確認する
+- python3 NController.py で起動する

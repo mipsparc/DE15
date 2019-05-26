@@ -3,13 +3,13 @@ import pygame
 
 class Sounder:
     def __init__(self):
-        pygame.mixer.pre_init(44100, -16, 1, 2048)
+        # buffer sizeを512にしてプツプツ音を抑えている
+        pygame.mixer.pre_init(44100, -16, 2, 512)
         pygame.init()
         self.idle = LoopSounds(['sound/idle.wav'])
         self.idle.volume(0.4)
         self.switch = pygame.mixer.Sound('sound/switch.wav')
         self.brake = LoopSounds(['sound/brake.wav'])
-        self.hone = pygame.mixer.Sound('sound/hone.wav')
         self.run = LoopSounds([
             'sound/run0.wav',
             'sound/run1.wav',
@@ -32,9 +32,6 @@ class Sounder:
         self.dream.volume(0.7)
         self.dep = LoopSounds(['sound/dep_sound.wav'])
         self.door_announce = pygame.mixer.Sound('sound/door_announce.wav')
-        
-    def Hone(self):
-        self.hone.play()
     
     def Switch(self):
         self.switch.play()
