@@ -3,21 +3,23 @@
 
 # 起動方法
 - メニューからターミナルを起動
-- コマンドを入力 cd NController
-- Enterキーを押す(フォルダを移動するコマンド)
-- コマンドを入力 python3 NControl.py
-- Enterキーを押す
+- コマンドを入力 `cd NController` Enterキーを押す(フォルダ移動)
+- コマンドを入力 `python3 NControl.py` Enterキーを押す(起動)
 
 # 終了方法
 - ターミナル画面でCtrlキーを押しながらcキーを押す
 
 # 新しいUbuntu系Linux搭載コンピュータで動かす環境構築
-- sudo apt install python3 python3-pygame python3-serial git
-- git clone git@github.com:mipsparc/NController.git
-- python3 NControl.py brake mascon controller で単体起動試験をする
+- `sudo apt install python3 python3-pygame python3-serial git`
+- `git clone git@github.com:mipsparc/NController.git`
+- `cd NController`
+- `python3 NControl.py brake mascon controller` で単体起動試験をする
 - udevの設定をして、デバイスに読み書き権限があるようにする。/dev/mascon, /dev/brake, /dev/controller に各デバイスを割り当てる
 - コンピュータを再起動する
-- screenコマンドなどで各デバイスの動作を確認する
+- ターミナルを開いて `cd NController`
+- `python3 BrakeReader.py` ブレーキ動作試験
+- `python3 MasconReader.py` マスコン動作試験
+- `python3 Controller.py` コントローラ動作試験
 
 # 構成
 ## MasconReader

@@ -53,6 +53,7 @@ class ReadBrake:
 
         return brake, buttons
 
+    # 速度計の針を動かす
     def setSpeed(self, speed):
         if speed == 0:
             speed = 1
@@ -69,11 +70,14 @@ class ReadBrake:
             output = 0
         if output > 255:
             output = 255
+        self.sendSpeed(output)
         
+    # 速度情報送信をする
+    def sendSpeed(self, output):
         self.ser.write(bytes([output]))
 
 if __name__ == '__main__':
-    brake = ReadBrake('/dev/ttyUSB1')
+    brake = ReadBrake('/dev/brake')
     while True:
         #print(brake.waitAndGetData())
         brake.showRawBrake()

@@ -25,7 +25,6 @@ class ReadMascon:
                 
         
 if __name__ == '__main__':
-    mascon = ReadMascon('/dev/ttyUSB2')
+    mascon = ReadMascon('/dev/mascon')
     while True:
         print(mascon.waitAndGetMascon())
-        
