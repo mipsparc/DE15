@@ -22,7 +22,11 @@ class ReadMascon:
             #buttons = buttons_new
             #print('ボタン状態: ' + bytes(buttons))
                 
-                
+def Worker(mascon_shared, device):    
+    mascon = ReadMascon(device)
+    while True:
+        mascon_level = mascon.waitAndGetMascon()
+        mascon_shared.value = mascon_level
         
 if __name__ == '__main__':
     mascon = ReadMascon('/dev/mascon')

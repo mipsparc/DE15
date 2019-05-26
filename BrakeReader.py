@@ -10,29 +10,23 @@ class ReadBrake:
     def __init__(self, device):
         self.ser = serial.Serial(device, timeout=0.3, baudrate=9600, write_timeout=0.3)
         
-        # 設定する
-        self.max_raw_brake = 7300.0
+        # 起動時は運転位置なので2倍
+        self.max_raw_brake = self.getRawBrake() * 2
         
         # 10km/h ごとの出力値テーブル
         self.speed_table = [0, 25, 54, 82, 112, 146, 178, 211, 244, 255]
 
-    def showRawBrake(self):
-        while True:
-            try:
-                line = self.ser.readline()
-                raw_brake, buttons, x = line.split(b',')
-                print(raw_brake)
-                break
-            except KeyboardInterrupt:
-                exit()
-            except:
-                pass
+    def getRawBrake(self):
+        raw_brake, buttons, x = self.getResult()
+        return raw_brake
+
+    def getResult(self):
+        self.ser.reset_input_buffer()
+        line = self.ser.readline()
+        return line.split(b',')
 
     def waitAndGetData(self):
-        self.ser.reset_input_buffer()
-
-        line = self.ser.readline()
-        result = line.split(b',')
+        result = self.getResult()
         if len(result) != 3:
             return [false, 0]
 
@@ -79,6 +73,22 @@ class ReadBrake:
     # 速度情報送信をする
     def sendSpeed(self, output):
         self.ser.write(bytes([output]))
+        
+def Worker(brake_shared, buttons_shared, speed_shared, device):
+    brake = ReadBrake(device)
+    brake.showRawBrake()
+    while True:
+        try:
+            brake_level, buttons = brake.waitAndGetData()
+            if brake_level is False:
+                continue
+            brake_shared.value = brake_level
+            buttons_shared.value = buttons
+            brake.setSpeed(speed_shared.value)
+        except:
+            pass
+        finally:
+            brake_shared.value = 1.0
 
 if __name__ == '__main__':
     brake = ReadBrake('/dev/brake')

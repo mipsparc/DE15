@@ -31,40 +31,18 @@ brake_port = '/dev/brake'
 controller_port = '/dev/controller'
 
 ## マスコン読み込みプロセス起動
-def ReadMasconWorker(mascon_shared, device):    
-    mascon = MasconReader.ReadMascon(device)
-    while True:
-        mascon_level = mascon.waitAndGetMascon()
-        mascon_shared.value = mascon_level
-
 mascon_shared = Value('i', 0)
 if MASCON_CONNECTED:
-    mascon_process = Process(target=ReadMasconWorker, args=(mascon_shared, mascon_port))
+    mascon_process = Process(target=MasconReader.Worker, args=(mascon_shared, mascon_port))
     mascon_process.daemon = True # auto kill
     mascon_process.start()
 
 # ブレーキ読み書きプロセス起動
-def ReadBrakeWorker(brake_shared, buttons_shared, speed_shared, device):
-    brake = BrakeReader.ReadBrake(device)
-    brake.showRawBrake()
-    while True:
-        try:
-            brake_level, buttons = brake.waitAndGetData()
-            if brake_level is False:
-                continue
-            brake_shared.value = brake_level
-            buttons_shared.value = buttons
-            brake.setSpeed(speed_shared.value)
-        except:
-            pass
-        finally:
-            brake_shared.value = 1.0
-
 brake_shared = Value('f', 0.0)
 buttons_shared = Value('i', 0)
 speed_shared = Value('i', 0)
 if BRAKE_CONNECTED:
-    brake_process = Process(target=ReadBrakeWorker, args=(brake_shared, buttons_shared, speed_shared, brake_port))
+    brake_process = Process(target=BrakeReader.Worker, args=(brake_shared, buttons_shared, speed_shared, brake_port))
     brake_process.daemon = True # auto kill
     brake_process.start()
 
@@ -110,7 +88,7 @@ while True:
         if CONTROLLER_CONNECTED:
             controller.move(speed, DE101.getWay(), DE101.isHonsenEnabled())
 
-        # 0.1秒経過するまでwaitする
+        # 0.1秒経過するまで待つ(sleepしないのは、音に影響するため)
         while (time.time() < last_counter + 0.1):
             pass
         last_counter = time.time()
@@ -119,4 +97,9 @@ while True:
         if CONTROLLER_CONNECTED:
             controller.move(0, 0, False)
             controller.move(0, 0, False)
+        if BRAKE_CONNECTED:
+            speed_shared.value = 0
+            
+        time.sleep(0.5)
+                    
         raise
