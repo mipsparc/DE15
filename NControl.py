@@ -34,7 +34,8 @@ controller_port = '/dev/controller'
 mascon_shared = Value('i', 0)
 if MASCON_CONNECTED:
     mascon_process = Process(target=MasconReader.Worker, args=(mascon_shared, mascon_port))
-    mascon_process.daemon = True # auto kill
+    # 親プロセスが死んだら自動的に終了
+    mascon_process.daemon = True
     mascon_process.start()
 
 # ブレーキ読み書きプロセス起動
@@ -43,7 +44,8 @@ buttons_shared = Value('i', 0)
 speed_shared = Value('i', 0)
 if BRAKE_CONNECTED:
     brake_process = Process(target=BrakeReader.Worker, args=(brake_shared, buttons_shared, speed_shared, brake_port))
-    brake_process.daemon = True # auto kill
+    # 親プロセスが死んだら自動的に終了
+    brake_process.daemon = True
     brake_process.start()
 
 # DE10のモデルオブジェクト
@@ -100,12 +102,14 @@ while True:
         last_counter = time.time()
         
     except KeyboardInterrupt:
+        # 終了時に走行が停止して、速度計が0になるようにする
         if CONTROLLER_CONNECTED:
             controller.move(0, 0, False)
             controller.move(0, 0, False)
         if BRAKE_CONNECTED:
             speed_shared.value = 0
             
+        # 速度計0が伝搬するまで待つ
         time.sleep(0.5)
                     
         raise

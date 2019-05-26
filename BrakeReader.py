@@ -4,13 +4,14 @@ import serial
 import time
 import random
 
-# シリアルからlong,int\r\nを受け取って
+# ブレーキ装置とシリアル伝送で通信して、long,int\r\nを受け取って
 # -1 ~ 0 ~ 1までの浮動小数点数と0 ~ 65535までの整数を返す
 class ReadBrake:
     def __init__(self, device):
+        # timeoutを設定することで通信エラーを防止する
         self.ser = serial.Serial(device, timeout=0.3, baudrate=9600, write_timeout=0.3)
         
-        # 起動時は運転位置なので2倍
+        # 起動初期設定。起動時は運転位置なので2倍
         self.max_raw_brake = self.getRawBrake() * 2
         
         # 10km/h ごとの出力値テーブル
@@ -18,8 +19,9 @@ class ReadBrake:
 
     def getRawBrake(self):
         raw_brake, buttons, x = self.getResult()
-        return raw_brake
+        return int(raw_brake)
 
+    # シリアル通信のバッファから取得する
     def getResult(self):
         self.ser.reset_input_buffer()
         line = self.ser.readline()
@@ -27,11 +29,11 @@ class ReadBrake:
 
     def waitAndGetData(self):
         result = self.getResult()
+        # 不正な値が来たときは読み飛ばす
         if len(result) != 3:
             return [false, 0]
 
         raw_brake, buttons, x = result
-        
         raw_brake = int(raw_brake)
         buttons = int(buttons)
         
@@ -39,9 +41,7 @@ class ReadBrake:
             raw_brake = self.max_raw_brake
         brake = ((raw_brake * 2) / self.max_raw_brake) - 1.0
         brake = -brake
-        if random.randrange(30) == 0:
-            print(self.max_raw_brake)
-    
+
         # 遊びを設ける
         if -0.4 < brake < 0.4:
             brake = 0.0
@@ -73,22 +73,25 @@ class ReadBrake:
     # 速度情報送信をする
     def sendSpeed(self, output):
         self.ser.write(bytes([output]))
-        
+
+# シリアル通信プロセスのワーカー
 def Worker(brake_shared, buttons_shared, speed_shared, device):
     brake = ReadBrake(device)
     brake.showRawBrake()
     while True:
         try:
             brake_level, buttons = brake.waitAndGetData()
+            # 不正値の読み飛ばし
             if brake_level is False:
+                continue
+            if brake_level < -1 or 1 < brake_level:
                 continue
             brake_shared.value = brake_level
             buttons_shared.value = buttons
             brake.setSpeed(speed_shared.value)
+        # できる限りエラーは無視する
         except:
             pass
-        finally:
-            brake_shared.value = 1.0
 
 if __name__ == '__main__':
     brake = ReadBrake('/dev/brake')
