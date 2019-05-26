@@ -46,6 +46,7 @@ if BRAKE_CONNECTED:
     brake_process.daemon = True # auto kill
     brake_process.start()
 
+# DE10のモデルオブジェクト
 DE101 = DE10.DE10()
 
 if CONTROLLER_CONNECTED:
@@ -53,11 +54,12 @@ if CONTROLLER_CONNECTED:
 
 Sound = SoundManager.SoundManager()
 
-# メインループを0.1秒おきに回す
+# メインループを0.1秒おきに回すためのunix timeカウンタ
 last_counter = time.time()
 
 while True:
     try:
+        # ハードウェアからの入力を共有メモリから取り出す
         mascon_level = mascon_shared.value
         brake_level = brake_shared.value
         buttons = buttons_shared.value
@@ -67,6 +69,7 @@ while True:
             brake_level = BRAKE_TEST_VALUE
             buttons = BUTTON_TEST_VALUE
         
+        # DE10モデルオブジェクトに入力を与える
         DE101.setMascon(mascon_level)
         DE101.setBrake(brake_level)
         DE101.setButtons(buttons)
@@ -76,20 +79,23 @@ while True:
         speed_shared.value = int(kph)
         print('BP: {}, BC: {}'.format(int(DE101.getBp()), int(490 - DE101.getBp())))
 
+        # 音を出す
         Sound.brake(DE101.bc)
         Sound.switch(DE101.getWay())
         Sound.run(kph)
         Sound.power(mascon_level)
 
+        # 非常ブレーキ条件
         if (not DE101.isKeyEnabled()) or (DE101.getWay() == 0):
             DE101.eb = True
             print('EB')
 
+        # PWMコントローラライブラリに速度などを渡す
         if CONTROLLER_CONNECTED:
             controller.move(speed, DE101.getWay(), DE101.isHonsenEnabled())
 
         # 0.1秒経過するまで待つ(sleepしないのは、音に影響するため)
-        while (time.time() < last_counter + 0.1):
+        while (time.time() <= last_counter + 0.1):
             pass
         last_counter = time.time()
         

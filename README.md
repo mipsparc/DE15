@@ -2,6 +2,8 @@
 このソフトウェア群は、鉄道模型を実際の運転台部品で制御し、実物の音が同時に鳴るシステムです。
 
 # 起動方法
+- 進行方向を前進に合わせる
+- ブレーキハンドルを運転位置に合わせる
 - メニューからターミナルを起動
 - コマンドを入力 `cd NController` Enterキーを押す(フォルダ移動)
 - コマンドを入力 `python3 NControl.py 2> log.txt` Enterキーを押す(起動)
@@ -15,7 +17,7 @@
 - `git clone git@github.com:mipsparc/NController.git`
 - `cd NController`
 - `python3 NControl.py brake mascon controller` で単体起動試験をする
-- udevの設定をして、デバイスに読み書き権限があるようにする。/dev/mascon, /dev/brake, /dev/controller に各デバイスを割り当てる
+- udevの設定をして、デバイスに読み書き権限があるようにする。シリアル番号をつかって/dev/mascon, /dev/brake, /dev/controller に各デバイスを割り当てる
 - コンピュータを再起動する
 - ターミナルを開いて `cd NController`
 - `python3 BrakeReader.py` ブレーキ動作試験
