@@ -15,7 +15,7 @@ class SoundManager:
         if (not self.last_brake) and bc != self.last_bc:
             self.last_brake = True
             self.last_bc = bc
-            self.s.brake.play()
+            self.s.brake.play(0)
         elif self.last_brake and bc == self.last_bc:
             self.last_brake = False
             self.s.brake.stop()
