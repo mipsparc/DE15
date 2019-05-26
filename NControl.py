@@ -43,18 +43,22 @@ if MASCON_CONNECTED:
     mascon_process.daemon = True # auto kill
     mascon_process.start()
 
-# ブレーキ読み込みプロセス起動
+# ブレーキ読み書きプロセス起動
 def ReadBrakeWorker(brake_shared, buttons_shared, speed_shared, device):
     brake = BrakeReader.ReadBrake(device)
     brake.showRawBrake()
     while True:
         try:
             brake_level, buttons = brake.waitAndGetData()
+            if brake_level is False:
+                continue
             brake_shared.value = brake_level
             buttons_shared.value = buttons
             brake.setSpeed(speed_shared.value)
         except:
             pass
+        finally:
+            brake_shared.value = 1.0
 
 brake_shared = Value('f', 0.0)
 buttons_shared = Value('i', 0)
@@ -108,7 +112,7 @@ while True:
 
         # 0.1秒経過するまでwaitする
         while (time.time() < last_counter + 0.1):
-            time.sleep(0.001)
+            pass
         last_counter = time.time()
         
     except KeyboardInterrupt:
@@ -116,5 +120,3 @@ while True:
             controller.move(0, 0, False)
             controller.move(0, 0, False)
         raise
-        
-

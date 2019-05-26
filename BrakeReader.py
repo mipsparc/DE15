@@ -32,7 +32,11 @@ class ReadBrake:
         self.ser.reset_input_buffer()
 
         line = self.ser.readline()
-        raw_brake, buttons, x = line.split(b',')
+        result = line.split(b',')
+        if len(result) != 3:
+            return [false, 0]
+
+        raw_brake, buttons, x = result
         
         raw_brake = int(raw_brake)
         buttons = int(buttons)

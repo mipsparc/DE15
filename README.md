@@ -4,13 +4,14 @@
 # 起動方法
 - メニューからターミナルを起動
 - コマンドを入力 `cd NController` Enterキーを押す(フォルダ移動)
-- コマンドを入力 `python3 NControl.py` Enterキーを押す(起動)
+- コマンドを入力 `python3 NControl.py 2> log.txt` Enterキーを押す(起動)
 
 # 終了方法
 - ターミナル画面でCtrlキーを押しながらcキーを押す
 
 # 新しいUbuntu系Linux搭載コンピュータで動かす環境構築
-- `sudo apt install python3 python3-pygame python3-serial git`
+- `sudo apt install python3 python3-serial git python3-pip`
+- `pip3 install pygame`
 - `git clone git@github.com:mipsparc/NController.git`
 - `cd NController`
 - `python3 NControl.py brake mascon controller` で単体起動試験をする
