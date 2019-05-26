@@ -32,7 +32,7 @@ class Sounds:
         for path in paths:
             self.sound.append(pygame.mixer.Sound(path))
             
-    def play(self, num):
+    def play(self, num=0):
         if self.loop:
             self.sound[num].play(loops=-1)
         else:

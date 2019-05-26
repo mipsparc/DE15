@@ -15,7 +15,7 @@ class SoundManager:
         if (not self.last_brake) and bc != self.last_bc:
             self.last_brake = True
             self.last_bc = bc
-            self.s.brake.play(0)
+            self.s.brake.play()
         elif self.last_brake and bc == self.last_bc:
             self.last_brake = False
             self.s.brake.stop()
@@ -23,7 +23,7 @@ class SoundManager:
     def switch(self, way):
         if self.last_way != way:
             self.last_way = way
-            self.s.switch.play(0)
+            self.s.switch.play()
         
     def run(self, kph):
         if kph == 0:
