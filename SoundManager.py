@@ -10,6 +10,7 @@ class SoundManager:
         self.last_way = 0
         self.last_kph = 0
         self.last_mascon_level = 0
+        self.s.idle.play()
 
     def brake(self, bc):
         if (not self.last_brake) and bc != self.last_bc:
