@@ -51,7 +51,6 @@ class SoundManager:
                 self.last_wheel = now
                 # 3軸目にダミーを入れる
                 if self.joint_count != 3:
-                    self.s.joint.stop()
                     self.s.joint.play()
                 if self.joint_count >= wheel_count:
                     self.joint_count = 0
