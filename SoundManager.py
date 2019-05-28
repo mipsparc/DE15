@@ -1,6 +1,7 @@
 #encoding: utf-8
 
 import Sounder
+import time
 
 class SoundManager:
     def __init__(self):
@@ -8,8 +9,13 @@ class SoundManager:
         self.last_brake = False
         self.last_bc = 0
         self.last_way = 0
-        self.last_kph = 0
         self.last_mascon_level = 0
+        # 最後にジョイントを先頭の車輪が通過したUNIX TIME
+        self.last_joint = time.time()
+        # 最後にジョイントを前の車輪が通過したUNIX TIME
+        self.last_wheel = 0
+        # 特定のジョイントを通過した車輪の数
+        self.joint_count = 0
         self.s.idle.play()
 
     def brake(self, bc):
@@ -21,33 +27,37 @@ class SoundManager:
             self.last_brake = False
             self.s.brake.stop()
 
+    def joint(self, speed):
+        # レール長
+        rail_length = 25.0
+        interval = rail_length / speed
+        # 車輪間の距離
+        wheel_distance = 1.2
+        interval_wheel = wheel_distance / speed
+        
+        # DE10なので5軸
+        wheel_count = 5
+        # 最後のジョイントから時間が経っていれば、先頭の車輪が次のジョイントに到達
+        now = time.time()
+        if self.last_joint + interval < now:
+            self.joint_count = 1
+            self.last_joint = now
+            self.last_wheel = now
+            self.s.joint.play()
+        
+        if self.joint_count > 0:
+            if self.last_wheel + interval_wheel < now:
+                self.joint_count += 1
+                self.last_wheel = now
+                self.s.joint.stop()
+                self.s.joint.play()
+                if self.joint_count >= wheel_count:
+                    self.joint_count = 0
+
     def switch(self, way):
         if self.last_way != way:
             self.last_way = way
             self.s.switch.play()
-        
-    def run(self, kph):
-        if kph == 0:
-            self.s.run.stop()
-        if 0 < kph < 15  and not(0 < self.last_kph < 15):
-            self.s.run.stop()
-            self.s.run.play(0)
-        if 15 <= kph < 25  and not (15 <= self.last_kph < 25):
-            self.s.run.stop()
-            self.s.run.play(1)
-        if 25 <= kph < 35  and not (25 <= self.last_kph < 35):
-            self.s.run.stop()
-            self.s.run.play(2)
-        if 35 <= kph < 45  and not (35 <= self.last_kph < 45):
-            self.s.run.stop()
-            self.s.run.play(3)
-        if 45 <= kph < 65  and not (45 <= self.last_kph < 65):
-            self.s.run.stop()
-            self.s.run.play(4)
-        if 65 <= kph  and not(65 <= self.last_kph):
-            self.s.run.stop()
-            self.s.run.play(5)
-        self.last_kph = kph
             
     def power(self, mascon_level):
         if mascon_level == 0:
