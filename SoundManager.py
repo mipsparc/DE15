@@ -35,8 +35,8 @@ class SoundManager:
         wheel_distance = 1.2
         interval_wheel = wheel_distance / speed
         
-        # DE10なので5軸
-        wheel_count = 5
+        # DE10なので5軸+ダミー1軸
+        wheel_count = 6
         # 最後のジョイントから時間が経っていれば、先頭の車輪が次のジョイントに到達
         now = time.time()
         if self.last_joint + interval < now:
@@ -49,8 +49,10 @@ class SoundManager:
             if self.last_wheel + interval_wheel < now:
                 self.joint_count += 1
                 self.last_wheel = now
-                self.s.joint.stop()
-                self.s.joint.play()
+                # 3軸目にダミーを入れる
+                if self.joint_count != 3:
+                    self.s.joint.stop()
+                    self.s.joint.play()
                 if self.joint_count >= wheel_count:
                     self.joint_count = 0
 

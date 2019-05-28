@@ -16,7 +16,7 @@ class Sounder:
         ])
         self.power.volume(0.7)
         self.joint = Sounds(['sound/joint.wav'], False)
-        self.joint.volume(0.7)
+        self.joint.volume(0.8)
 
 class Sounds:
     def __init__(self, paths, loop=True):
