@@ -26,6 +26,7 @@ class SoundManager:
         elif self.last_brake and bc == self.last_bc:
             self.last_brake = False
             self.s.brake.stop()
+            self.s.brake_fadeout.play()
 
     def joint(self, speed):
         # レール長

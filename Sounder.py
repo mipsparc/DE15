@@ -9,6 +9,7 @@ class Sounder:
         self.idle.volume(0.7)
         self.switch = Sounds(['sound/switch.wav'], False)
         self.brake = Sounds(['sound/brake.wav'])
+        self.brake_fadeout = Sound(['sound/brake_fadeout.wav'],False)
         self.power = Sounds([
             'sound/power1.wav',
             'sound/power2.wav',
