@@ -17,7 +17,7 @@
 - `git clone git@github.com:mipsparc/NController.git`
 - `cd NController`
 - `python3 NControl.py brake mascon controller` で単体起動試験をする
-- udevの設定をして、デバイスに読み書き権限があるようにする。シリアル番号をつかって/dev/mascon, /dev/brake, /dev/controller に各デバイスを割り当てる
+- udevでデバイスファイルを割り当てる。 `sudo cp udev_rules/* /etc/udev/rules.d/`
 - コンピュータを再起動する
 - ターミナルを開いて `cd NController`
 - `python3 BrakeReader.py` ブレーキ動作試験
