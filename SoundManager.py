@@ -18,17 +18,21 @@ class SoundManager:
         self.joint_count = 0
         self.s.idle.play()
 
-    def brake(self, bc):
+    def brake(self, bc, brake_level):
         if (not self.last_brake) and bc != self.last_bc:
             self.last_brake = True
-            self.last_bc = bc
             self.s.brake.play()
         elif self.last_brake and bc == self.last_bc:
             self.last_brake = False
             self.s.brake.stop()
             self.s.brake_fadeout.play()
+        self.last_bc = bc
+        self.s.brake.volume(abs(brake_level))
 
     def joint(self, speed):
+        if speed < 0.1:
+            return
+        
         # レール長
         rail_length = 25.0
         interval = rail_length / speed
