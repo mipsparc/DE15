@@ -11,15 +11,21 @@ class ReadBrake:
         # timeoutを設定することで通信エラーを防止する
         self.ser = serial.Serial(device, timeout=0.3, baudrate=9600, write_timeout=0.3)
         
-        # 起動初期設定。起動時は運転位置なので2倍
-        self.max_raw_brake = self.getRawBrake() * 2
+        # 現在のコントローラでは一番右がMAXなので、実際のMAXの値から引いたものが現在のraw_brake
+        self.max_value = 65480
+        
+        # 起動初期設定。起動時は一番奥にする
+        self.max_raw_brake = self.getRawBrake()
         
         # 10km/h ごとの出力値テーブル
         self.speed_table = [0, 25, 54, 82, 112, 146, 178, 211, 244, 255]
-
+        
     def getRawBrake(self):
-        raw_brake, buttons, x = self.getResult()
-        return int(raw_brake)
+        result = self.getResult()
+        # 不正な値が来たときは読み飛ばす
+        if len(result) != 3:
+            return False
+        return self.max_value - int(result[0])
 
     # シリアル通信のバッファから取得する
     def getResult(self):
@@ -34,7 +40,7 @@ class ReadBrake:
             return [false, 0]
 
         raw_brake, buttons, x = result
-        raw_brake = int(raw_brake)
+        raw_brake = abs(self.max_value - int(raw_brake))
         buttons = int(buttons)
         
         if raw_brake > self.max_raw_brake:
@@ -77,7 +83,7 @@ class ReadBrake:
 # シリアル通信プロセスのワーカー
 def Worker(brake_shared, buttons_shared, speed_shared, device):
     brake = ReadBrake(device)
-    brake.showRawBrake()
+    print(brake.getRawBrake())
     while True:
         try:
             brake_level, buttons = brake.waitAndGetData()
@@ -96,6 +102,6 @@ def Worker(brake_shared, buttons_shared, speed_shared, device):
 if __name__ == '__main__':
     brake = ReadBrake('/dev/brake')
     while True:
-        #print(brake.waitAndGetData())
-        brake.showRawBrake()
+        print(brake.waitAndGetData())
+        #print(brake.getRawBrake())
         
