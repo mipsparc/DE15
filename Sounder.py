@@ -16,7 +16,7 @@ class Sounder:
             'sound/power2.wav',
             'sound/power3.wav',
         ])
-        self.power.volume(0.6)
+        self.power.volume(0.4)
         self.joint = Sounds(['sound/joint.wav'], False)
         self.joint.volume(0.4)
 
