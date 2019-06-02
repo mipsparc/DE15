@@ -1,4 +1,3 @@
-#! /usr/bin/env python3
 #coding: utf-8
 
 import DE10
@@ -8,14 +7,21 @@ import Controller
 import SoundManager
 from multiprocessing import Process, Value
 import time
-from sys import argv
+import sys
+
+mascon_port = '/dev/mascon'
+brake_port = '/dev/brake'
+controller_port = '/dev/controller'
+
+# 標準エラー出力をログファイルにする
+sys.stderr = open('log.txt', 'w')
 
 # 引数として接続されていないものを渡す
 # ex) python3 ./NController.py controller mascon brake
 CONTROLLER_CONNECTED = True
 MASCON_CONNECTED = True
 BRAKE_CONNECTED = True
-test_params = argv[1:]
+test_params = sys.argv[1:]
 if 'controller' in test_params:
     CONTROLLER_CONNECTED = False
 if 'mascon' in test_params:
@@ -25,10 +31,6 @@ if 'brake' in test_params:
     BRAKE_CONNECTED = False
     BRAKE_TEST_VALUE = 0
     BUTTON_TEST_VALUE = 136
-
-mascon_port = '/dev/mascon'
-brake_port = '/dev/brake'
-controller_port = '/dev/controller'
 
 ## マスコン読み込みプロセス起動
 mascon_shared = Value('i', 0)
