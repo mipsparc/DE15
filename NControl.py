@@ -1,5 +1,8 @@
 #coding: utf-8
 
+# 実際の運転台部品で鉄道模型をリアルに制御するシミュレータシステム
+# はじめにREADME.mdを読むこと
+
 import DE10
 import MasconReader
 import BrakeReader
@@ -9,6 +12,7 @@ from multiprocessing import Process, Value
 import time
 import sys
 
+# 各装置のデバイスファイル(udevファイルを読み込ませていればこのまま)
 mascon_port = '/dev/mascon'
 brake_port = '/dev/brake'
 controller_port = '/dev/controller'
@@ -30,9 +34,9 @@ if 'mascon' in test_params:
 if 'brake' in test_params:
     BRAKE_CONNECTED = False
     BRAKE_TEST_VALUE = 0
-    BUTTON_TEST_VALUE = 136
+    BUTTON_TEST_VALUE = 0b01000000 + 0b00010000 + 0b00001000 # 前進、本線、鍵ON
 
-## マスコン読み込みプロセス起動
+# マスコン読み込みプロセス起動、共有メモリ作成
 mascon_shared = Value('i', 0)
 if MASCON_CONNECTED:
     mascon_process = Process(target=MasconReader.Worker, args=(mascon_shared, mascon_port))
@@ -40,7 +44,7 @@ if MASCON_CONNECTED:
     mascon_process.daemon = True
     mascon_process.start()
 
-# ブレーキ読み書きプロセス起動
+# ブレーキ読み書きプロセス起動、共有メモリ作成
 brake_shared = Value('f', 0.0)
 buttons_shared = Value('i', 0)
 speed_shared = Value('i', 0)
@@ -53,9 +57,11 @@ if BRAKE_CONNECTED:
 # DE10のモデルオブジェクト
 DE101 = DE10.DE10()
 
+# PWMコントローラオブジェクト
 if CONTROLLER_CONNECTED:
     controller = Controller.Controller(controller_port)
 
+# サウンドシステム
 Sound = SoundManager.SoundManager()
 
 # メインループを0.1秒おきに回すためのunix timeカウンタ
@@ -79,8 +85,11 @@ while True:
         DE101.setButtons(buttons)
         DE101.advanceTime(DE101.isHonsenEnabled())
         speed = DE101.getSpeed()
+        
         kph = speed * 3600 / 1000
+        # 速度計に現在車速を与える
         speed_shared.value = int(kph)
+        
         print('BP: {}, BC: {}'.format(int(DE101.getBp()), int(490 - DE101.getBp())))
 
         # 音を出す
@@ -102,7 +111,8 @@ while True:
         while (time.time() <= last_counter + 0.1):
             pass
         last_counter = time.time()
-        
+
+    # Ctrl-c押下時
     except KeyboardInterrupt:
         # 終了時に走行が停止して、速度計が0になるようにする
         if CONTROLLER_CONNECTED:
