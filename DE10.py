@@ -5,10 +5,10 @@ class DE10:
         # 車速(m/s)
         self.speed = 0
         self.mascon_level = 0
-        # ブレーキシリンダ圧力(減速度)
-        self.bc = 0
         # 最大ブレーキシリンダ圧力
         self.BC_MAX = 3.0
+        # ブレーキシリンダ圧力(減速度)
+        self.bc = self.BC_MAX
         # ブレーキレバー位置(ブレーキシリンダ圧力に作用)
         self.brake_level = 0
         #非常ブレーキ状態
@@ -16,7 +16,8 @@ class DE10:
         #貨車牽引時の加速度減少(単機: 1)
         self.freight = 0.6
         #統合モジュールのボタン状態(intでビット列)
-        self.buttons = 0
+        # 初期値は前進、本線、鍵ON
+        self.buttons = 0b01000000 + 0b00010000 + 0b00001000
 
     # 0.1秒進める
     def advanceTime(self, honsen):
@@ -95,6 +96,3 @@ class DE10:
     # 鍵スイッチ状態をboolで返す
     def isKeyEnabled(self):
         return bool(self.buttons & 0b00001000)
-
-        
-    
