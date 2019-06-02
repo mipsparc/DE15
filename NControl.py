@@ -11,6 +11,7 @@ import SoundManager
 from multiprocessing import Process, Value
 import time
 import sys
+import os
 
 # 各装置のデバイスファイル(udevファイルを読み込ませていればこのまま)
 mascon_port = '/dev/mascon'
@@ -18,7 +19,8 @@ brake_port = '/dev/brake'
 controller_port = '/dev/controller'
 
 # 標準エラー出力をログファイルにする
-sys.stderr = open('log.txt', 'w')
+os.makedirs('log', exist_ok=True)
+sys.stderr = open('log/' + str(int(time.time())) + '.txt', 'w')
 
 # 引数として接続されていないものを渡す
 # ex) python3 ./NController.py controller mascon brake
