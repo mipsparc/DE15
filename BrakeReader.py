@@ -12,7 +12,7 @@ class ReadBrake:
         self.ser = serial.Serial(device, timeout=0.3, baudrate=9600, write_timeout=0.3)
         
         # 現在のコントローラでは一番右がMAXなので、実際のMAXの値から引いたものが現在のraw_brake
-        self.max_value = 65480
+        self.max_value = 53480
         
         # 起動初期設定。起動時は一番奥にする
         self.max_raw_brake = self.getRawBrake()
