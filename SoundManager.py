@@ -2,6 +2,7 @@
 
 import Sounder
 import time
+import math
 
 class SoundManager:
     def __init__(self):
@@ -16,6 +17,13 @@ class SoundManager:
         self.last_wheel = 0
         # 特定のジョイントを通過した車輪の数
         self.joint_count = 0
+        self.last_run = False
+        
+        self.run_max_volume = 0.3
+        self.s.power.volume(0.3)
+        self.s.joint.volume(0.3)
+        self.s.switch.volume(0.2)
+        self.s.idle.volume(0.2)
         self.s.idle.play()
 
     def brake(self, bc):
@@ -58,6 +66,16 @@ class SoundManager:
                     self.s.joint.play()
                 if self.joint_count >= wheel_count:
                     self.joint_count = 0
+    def run(self, speed):
+        if not self.last_run and speed > 0.1:
+            self.s.run.play()
+            self.last_run = True
+        elif speed < 0.1:
+            self.s.run.stop()
+            self.last_run = False
+            return
+        
+        self.s.run.volume(min(speed / 15 * self.run_max_volume, self.run_max_volume))
 
     def switch(self, way):
         if self.last_way != way:
@@ -67,13 +85,7 @@ class SoundManager:
     def power(self, mascon_level):
         if mascon_level == 0:
             self.s.power.stop()
-        if 1 <= mascon_level < 5 and (self.last_mascon_level == 0 or 5 <= self.last_mascon_level):
+        elif mascon_level != self.last_mascon_level:
             self.s.power.stop()
-            self.s.power.play(0)
-        elif 5 <= mascon_level < 10 and (self.last_mascon_level < 5 or 10 <= self.last_mascon_level):
-            self.s.power.stop()
-            self.s.power.play(1)
-        elif 10 <= mascon_level < 14 and (self.last_mascon_level < 10 or 14 <= self.last_mascon_level):
-            self.s.power.stop()
-            self.s.power.play(2)
+            self.s.power.play(math.floor((mascon_level - 1) / 2.0))
         self.last_mascon_level = mascon_level

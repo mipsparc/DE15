@@ -6,19 +6,20 @@ class Sounder:
     def __init__(self):
         pygame.mixer.init(44100, -16, 1, 256)
         self.idle = Sounds(['sound/idle.wav'])
-        self.idle.volume(0.2)
         self.switch = Sounds(['sound/switch.wav'], False)
-        self.switch.volume(0.2)
         self.brake = Sounds(['sound/brake.wav'])
         self.brake_fadeout = Sounds(['sound/brake_fadeout.wav'],False)
         self.power = Sounds([
-            'sound/power1.wav',
-            'sound/power2.wav',
-            'sound/power3.wav',
+            'sound/power_1_2.wav',
+            'sound/power_3_4.wav',
+            'sound/power_5_6.wav',
+            'sound/power_7_8.wav',
+            'sound/power_9_10.wav',
+            'sound/power_11_12.wav',
+            'sound/power_13_14.wav',
         ])
-        self.power.volume(0.4)
         self.joint = Sounds(['sound/joint.wav'], False)
-        self.joint.volume(0.4)
+        self.run = Sounds(['sound/run.wav'])
 
 class Sounds:
     def __init__(self, paths, loop=True):

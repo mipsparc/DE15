@@ -99,6 +99,7 @@ while True:
         Sound.switch(DE101.getWay())
         Sound.power(mascon_level)
         Sound.joint(speed)
+        Sound.run(speed)
 
         # 非常ブレーキ条件
         if (not DE101.isKeyEnabled()) or (DE101.getWay() == 0):
