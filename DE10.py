@@ -1,4 +1,5 @@
 #coding:utf-8
+import math
 
 class DE10:
     def __init__(self):
@@ -18,26 +19,46 @@ class DE10:
         #統合モジュールのボタン状態(intでビット列)
         # 初期値は前進、本線、鍵ON
         self.buttons = 0b01000000 + 0b00010000 + 0b00001000
+        # 力行可能状態
+        self.accellable = True
+        
+    def getSmoothLevel(self):
+        # y = log2(x+1) 最大が1
+        return (math.log2(self.mascon_level+1))/4.0
 
     # 0.1秒進める
-    def advanceTime(self, honsen):
+    def advanceTime(self):
+        # 走行中に切にするか、力行中にブレーキを扱うと力行不可になる
+        if (self.getWay() == 0 and self.speed > 0) or (self.mascon_level > 0 and self.brake_level > 0):
+            self.accellable = False
+        if self.accellable == False:
+            self.mascon_level = 0
+            print('力行不可')
+            # 停車で戻る
+            if self.speed == 0:
+                self.accellable = True
+
         # 加速度を求める(m/s2)
         if self.speed < 12:
-            accel = self.mascon_level / 14.0 * 0.803
+            accel = self.getSmoothLevel() * 0.803
         elif 12 <= self.speed < 25:
-            accel = self.mascon_level / 14.0 * 0.5
+            accel = self.getSmoothLevel() * 0.5
         elif 25 <= self.speed < 35:
-            accel = self.mascon_level / 14.0 * 0.333
+            accel = self.getSmoothLevel() * 0.333
         elif 35 <= self.speed < 45:
-            accel = self.mascon_level / 14.0 * 0.222
+            accel = self.getSmoothLevel() * 0.222
         elif 45 <= self.speed:
-            accel = self.mascon_level / 14.0 * 0.194
-        
+            accel = self.getSmoothLevel() * 0.194
+        # 最高速度では加速は0になる
+        elif 25 < self.speed:
+            accel = 0
+
+        # 切位置時は空吹かしになって加速はしない
+        if self.getWay() == 0:
+            accel = 0
+
         # 0.1秒あたりのブレーキレバー作用(max ±1.9m/s3) ここは実物に則さない
-        if honsen:
-            self.bc += self.brake_level * 1.9 * 0.1
-        else:
-            self.bc += self.brake_level * 2.3 * 0.1
+        self.bc += self.brake_level * 1.9 * 0.1
         
         # 減速度(m/s2 max ±5.0m/s2) ここは実物に則さない
         if self.bc < 0:
@@ -49,17 +70,18 @@ class DE10:
         self.speed = self.speed + (accel - self.bc) * 0.1 * self.freight
         if self.speed < 0:
             self.speed = 0
-            
-        # OSR 98km/hを超えると非常ブレーキ
-        if self.speed > 27.2:
+
+        # キーSWが運転位置にない場合はEB
+        if not self.isKeyEnabled():
             self.eb = True
+            print('EB')
 
         # 非常ブレーキ
         if self.eb:
             self.bc = self.BC_MAX
             self.setMascon(0)
-            # 十分に低速になったら自動で復位
-            if self.speed < 1:
+            # 停車で復位
+            if self.speed == 0:
                 self.eb = False
                 self.setBrake(0)
 

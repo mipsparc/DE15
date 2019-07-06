@@ -19,7 +19,8 @@ class SoundManager:
         self.joint_count = 0
         self.last_run = False
         
-        self.run_max_volume = 0.3
+        # 頻繁に鳴る音はボリュームを合わせて1.0を超えないようにする
+        self.run_max_volume = 0.2
         self.s.power.volume(0.3)
         self.s.joint.volume(0.3)
         self.s.switch.volume(0.2)

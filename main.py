@@ -32,10 +32,10 @@ if 'controller' in test_params:
     CONTROLLER_CONNECTED = False
 if 'mascon' in test_params:
     MASCON_CONNECTED = False
-    MASCON_TEST_VALUE = 6
+    MASCON_TEST_VALUE = 4
 if 'brake' in test_params:
     BRAKE_CONNECTED = False
-    BRAKE_TEST_VALUE = 0
+    BRAKE_TEST_VALUE = -1
     BUTTON_TEST_VALUE = 0b01000000 + 0b00010000 + 0b00001000 # 前進、本線、鍵ON
 
 # マスコン読み込みプロセス起動、共有メモリ作成
@@ -85,7 +85,7 @@ while True:
         DE101.setMascon(mascon_level)
         DE101.setBrake(brake_level)
         DE101.setButtons(buttons)
-        DE101.advanceTime(DE101.isHonsenEnabled())
+        DE101.advanceTime()
         speed = DE101.getSpeed()
         
         kph = speed * 3600 / 1000
@@ -100,11 +100,6 @@ while True:
         Sound.power(mascon_level)
         Sound.joint(speed)
         Sound.run(speed)
-
-        # 非常ブレーキ条件
-        if (not DE101.isKeyEnabled()) or (DE101.getWay() == 0):
-            DE101.eb = True
-            print('EB')
 
         # PWMコントローラライブラリに速度などを渡す
         if CONTROLLER_CONNECTED:
@@ -123,8 +118,8 @@ while True:
             controller.move(0, 0, False)
         if BRAKE_CONNECTED:
             speed_shared.value = 0
-            
+
         # 速度計0が伝搬するまで待つ
         time.sleep(0.5)
-                    
+
         raise
