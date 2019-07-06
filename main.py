@@ -23,7 +23,7 @@ os.makedirs('log', exist_ok=True)
 sys.stderr = open('log/' + str(int(time.time())) + '.txt', 'w')
 
 # 引数として接続されていないものを渡す
-# ex) python3 ./NController.py controller mascon brake
+# ex) python3 ./main.py controller mascon brake
 CONTROLLER_CONNECTED = True
 MASCON_CONNECTED = True
 BRAKE_CONNECTED = True

@@ -6,7 +6,7 @@
 - ブレーキハンドルを手前いっぱいにする
 - メニューからターミナルエミュレータを起動
 - コマンドを入力 `cd NController` Enterキーを押す(フォルダ移動)
-- コマンドを入力 `python3 NControl.py` Enterキーを押す(起動)
+- コマンドを入力 `python3 main.py` Enterキーを押す(起動)
 
 `log/12345.txt` などにエラーログが記載されているので、動作に違和感を感じたら最も数字が大きいファイル(最新)を確認する
 
@@ -18,7 +18,7 @@
 - `pip3 install pygame`
 - `git clone git@github.com:mipsparc/NController.git`
 - `cd NController`
-- `python3 NControl.py brake mascon controller` で単体起動試験をする
+- `python3 main.py brake mascon controller` で単体起動試験をする
 - udevでデバイスファイルを割り当てる。 `sudo cp udev_rules/* /etc/udev/rules.d/`
 - コンピュータを再起動する
 - ターミナルを開いて `cd NController`
