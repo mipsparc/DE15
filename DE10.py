@@ -19,8 +19,8 @@ class DE10:
         #統合モジュールのボタン状態(intでビット列)
         # 初期値は前進、本線、鍵ON
         self.buttons = 0b01000000 + 0b00010000 + 0b00001000
-        # 力行可能状態
-        self.accellable = True
+        # ギアが入ってる
+        self.gear_in = True
         
     def getSmoothLevel(self):
         # y = log2(x+1) 最大が1
@@ -28,16 +28,6 @@ class DE10:
 
     # 0.1秒進める
     def advanceTime(self):
-        # 走行中に切にするか、力行中にブレーキを扱うと力行不可になる
-        if (self.getWay() == 0 and self.speed > 0) or (self.mascon_level > 0 and self.brake_level > 0):
-            self.accellable = False
-        if self.accellable == False:
-            self.mascon_level = 0
-            print('力行不可')
-            # 停車で戻る
-            if self.speed == 0:
-                self.accellable = True
-
         # 加速度を求める(m/s2)
         if self.speed < 12:
             accel = self.getSmoothLevel() * 0.803
@@ -53,8 +43,15 @@ class DE10:
         elif 25 < self.speed:
             accel = 0
 
-        # 切位置時は空吹かしになって加速はしない
-        if self.getWay() == 0:
+        # 走行中に切にすると停車までギアが外れる
+        if self.getWay() == 0 and self.speed > 0:
+            self.gear_in = False
+        # 停車で復旧
+        if self.gear_in == False and self.speed == 0:
+                self.gear_in = True
+
+        # 切位置時かギア外れ時は空吹かしになって加速はしない
+        if self.getWay() == 0 or not self.gear_in:
             accel = 0
 
         # 0.1秒あたりのブレーキレバー作用(max ±1.9m/s3) ここは実物に則さない
