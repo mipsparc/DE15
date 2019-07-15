@@ -14,12 +14,12 @@ class Sounder:
             'sound/power_3_4.wav',
             'sound/power_5_6.wav',
             'sound/power_7_8.wav',
-            'sound/power_9_10.wav',
-            'sound/power_11_12.wav',
-            'sound/power_13_14.wav',
+            'sound/power_9_10_11_12_13_14.wav',
         ])
         self.joint = Sounds(['sound/joint.wav'], False)
         self.run = Sounds(['sound/run.wav'])
+        
+        self.idle.play()
 
 class Sounds:
     def __init__(self, paths, loop=True):

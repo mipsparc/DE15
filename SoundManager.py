@@ -10,7 +10,7 @@ class SoundManager:
         self.last_brake = False
         self.last_bc = 0
         self.last_way = 0
-        self.last_mascon_level = 0
+        self.power_num = 99 # dummy
         # 最後にジョイントを先頭の車輪が通過したUNIX TIME
         self.last_joint = time.time()
         # 最後にジョイントを前の車輪が通過したUNIX TIME
@@ -22,9 +22,9 @@ class SoundManager:
         # 頻繁に鳴る音はボリュームを合わせて1.0を超えないようにする
         self.run_max_volume = 0.2
         self.s.power.volume(0.3)
-        self.s.joint.volume(0.3)
+        self.s.joint.volume(0.5)
         self.s.switch.volume(0.2)
-        self.s.idle.volume(0.2)
+        self.s.idle.volume(0.15)
         self.s.idle.play()
 
     def brake(self, bc):
@@ -83,10 +83,22 @@ class SoundManager:
             self.last_way = way
             self.s.switch.play()
             
-    def power(self, mascon_level):
-        if mascon_level == 0:
+    def power(self, mascon_level):        
+        if mascon_level in (1, 2):
+            num = 0
+        elif mascon_level in (3, 4):
+            num = 1
+        elif mascon_level in (5, 6):
+            num = 2
+        elif mascon_level in (7, 8):
+            num = 3
+        else:
+            num = 4
+
+        if num != self.power_num:
             self.s.power.stop()
-        elif mascon_level != self.last_mascon_level:
-            self.s.power.stop()
-            self.s.power.play(math.floor((mascon_level - 1) / 2.0))
-        self.last_mascon_level = mascon_level
+            self.power_num = num
+            if mascon_level == 0:
+                return
+            self.s.power.play(num)
+        
