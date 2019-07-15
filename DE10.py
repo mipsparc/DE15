@@ -32,12 +32,12 @@ class DE10:
     def advanceTime(self):
         # ブレーキ中に力行すると力行継電器が切れる
         if self.brake_level < 0 and self.mascon_level > 0:
-            accel_relay = False
+            self.accel_relay = False
         if not accel_relay:
             self.mascon_level = 0
         # ノッチオフで力行継電器ON
         if self.mascon_level == 0:
-            accel_relay = True
+            self.accel_relay = True
         
         # 加速度を求める(m/s2)
         if self.speed < 12:
