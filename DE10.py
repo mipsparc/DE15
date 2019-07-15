@@ -6,7 +6,7 @@ class DE10:
         # 車速(m/s)
         self.speed = 0
         self.mascon_level = 0
-        # 最大ブレーキシリンダ圧力
+        # 最大ブレーキシリンダ圧力 本物は5.7kg/cm2
         self.BC_MAX = 3.0
         # ブレーキシリンダ圧力(減速度)
         self.bc = self.BC_MAX
@@ -19,8 +19,10 @@ class DE10:
         #統合モジュールのボタン状態(intでビット列)
         # 初期値は前進、本線、鍵ON
         self.buttons = 0b01000000 + 0b00010000 + 0b00001000
-        # ギアが入ってる
-        self.gear_in = True
+        # クラッチがつながっているか
+        self.clutch = True
+        #力行継電器がONか
+        self.accel_relay = True
         
     def getSmoothLevel(self):
         # y = log2(x+1) 最大が1
@@ -28,6 +30,15 @@ class DE10:
 
     # 0.1秒進める
     def advanceTime(self):
+        # ブレーキ中に力行すると力行継電器が切れる
+        if self.brake_level < 0 and self.mascon_level > 0:
+            accel_relay = False
+        if not accel_relay:
+            self.mascon_level = 0
+        # ノッチオフで力行継電器ON
+        if self.mascon_level == 0:
+            accel_relay = True
+        
         # 加速度を求める(m/s2)
         if self.speed < 12:
             accel = self.getSmoothLevel() * 0.803
@@ -43,21 +54,25 @@ class DE10:
         elif 25 < self.speed:
             accel = 0
 
-        # 走行中に切にすると停車までギアが外れる
+        # 走行中に切にすると停車までクラッチが切れる
         if self.getWay() == 0 and self.speed > 0:
-            self.gear_in = False
-        # 停車で復旧
-        if self.gear_in == False and self.speed == 0:
-                self.gear_in = True
+            self.clutch = False
+        # 停車でクラッチ接続
+        if self.cluth == False and self.speed == 0:
+                self.clutch = True
 
-        # 切位置時かギア外れ時は空吹かしになって加速はしない
-        if self.getWay() == 0 or not self.gear_in:
+        # 切位置時かクラッチ切れ時は空吹かしになって加速はしない
+        if self.getWay() == 0 or not self.clutch:
             accel = 0
 
         # 0.1秒あたりのブレーキレバー作用(max ±1.9m/s3) ここは実物に則さない
-        self.bc += self.brake_level * 1.9 * 0.1
+        if self.isKeyEnabled():
+            self.bc += self.brake_level * 1.9 * 0.1
+        # キーSWが運転位置にない場合は固定
+        else:
+            print('固定位置')
         
-        # 減速度(m/s2 max ±5.0m/s2) ここは実物に則さない
+        # 減速度(m/s2) ここは実物に則さない
         if self.bc < 0:
             self.bc = 0
         elif self.bc > self.BC_MAX:
@@ -67,11 +82,6 @@ class DE10:
         self.speed = self.speed + (accel - self.bc) * 0.1 * self.freight
         if self.speed < 0:
             self.speed = 0
-
-        # キーSWが運転位置にない場合はEB
-        if not self.isKeyEnabled():
-            self.eb = True
-            print('EB')
 
         # 非常ブレーキ
         if self.eb:
