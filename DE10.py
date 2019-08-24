@@ -63,6 +63,7 @@ class DE10:
 
         # 切位置時かクラッチ切れ時は空吹かしになって加速はしない
         if self.getWay() == 0 or not self.clutch:
+            print('空吹かし')
             accel = 0
 
         # 0.1秒あたりのブレーキレバー作用(max ±1.9m/s3) ここは実物に則さない

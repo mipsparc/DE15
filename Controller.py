@@ -37,18 +37,14 @@ class Controller:
             return
         
         # 動き始める速度
-        if honsen:
-            #base_power = 46
-            base_power = 50
-        else:
-            base_power = 47
+        base_power = 42
         
         #出力値の傾き
-        magnify_1 = 2.2
-        magnify_2 = 2.0
+        magnify_1 = 1.9
+        magnify_2 = 1.6
         
         #傾きが変化する閾値
-        criteria = 5.5
+        criteria = 3.0
         
         #1次関数を2つ繋げる
         if speed < criteria:
@@ -58,7 +54,7 @@ class Controller:
             
         if (output_power + base_power) > 255:
             output_power = 255 - base_power
-        
+
         if self.write_count == True:
             self.write_count = False
             if speed <= 0:

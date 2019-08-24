@@ -18,7 +18,7 @@ class ReadBrake:
         self.max_raw_brake = self.getRawBrake()
         
         # 10km/h ごとの出力値テーブル
-        self.speed_table = [0, 25, 54, 82, 112, 146, 178, 211, 244, 255]
+        self.speed_table = [0, 45, 75, 107, 137, 173, 206, 242, 252, 253]
         
     def getRawBrake(self):
         result = self.getResult()
