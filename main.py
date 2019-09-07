@@ -8,6 +8,7 @@ import MasconReader
 import BrakeReader
 import Controller
 import SoundManager
+import Meter
 from multiprocessing import Process, Value
 import time
 import sys
@@ -17,6 +18,7 @@ import os
 mascon_port = '/dev/mascon'
 brake_port = '/dev/brake'
 controller_port = '/dev/controller'
+meter_port = '/dev/meter'
 
 # 標準エラー出力をログファイルにする
 os.makedirs('log', exist_ok=True)
@@ -27,6 +29,7 @@ sys.stderr = open('log/' + str(int(time.time())) + '.txt', 'w')
 CONTROLLER_CONNECTED = True
 MASCON_CONNECTED = True
 BRAKE_CONNECTED = True
+METER_CONNECTED = True
 test_params = sys.argv[1:]
 if 'controller' in test_params:
     CONTROLLER_CONNECTED = False
@@ -35,8 +38,10 @@ if 'mascon' in test_params:
     MASCON_TEST_VALUE = 4
 if 'brake' in test_params:
     BRAKE_CONNECTED = False
-    BRAKE_TEST_VALUE = -1
+    BRAKE_TEST_VALUE = -0.2
     BUTTON_TEST_VALUE = 0b01000000 + 0b00010000 + 0b00001000 # 前進、本線、鍵ON
+if 'meter' in test_params:
+    METER_CONNECTED = False
 
 # マスコン読み込みプロセス起動、共有メモリ作成
 mascon_shared = Value('i', 0)
@@ -62,6 +67,9 @@ DE101 = DE10.DE10()
 # PWMコントローラオブジェクト
 if CONTROLLER_CONNECTED:
     controller = Controller.Controller(controller_port)
+
+if METER_CONNECTED:
+    meter = Meter.Meter(meter_port)
 
 # サウンドシステム
 Sound = SoundManager.SoundManager()
@@ -104,6 +112,9 @@ while True:
         # PWMコントローラライブラリに速度などを渡す
         if CONTROLLER_CONNECTED:
             controller.move(speed, DE101.getWay(), DE101.isHonsenEnabled())
+
+        if METER_CONNECTED:
+            meter.send(DE101.bc)
 
         # 0.1秒経過するまで待つ(sleepしないのは、音に影響するため)
         while (time.time() <= last_counter + 0.1):
