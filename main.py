@@ -38,7 +38,7 @@ if 'mascon' in test_params:
     MASCON_TEST_VALUE = 4
 if 'brake' in test_params:
     BRAKE_CONNECTED = False
-    BRAKE_TEST_VALUE = -0.2
+    BRAKE_TEST_VALUE = -0.3
     BUTTON_TEST_VALUE = 0b01000000 + 0b00010000 + 0b00001000 # 前進、本線、鍵ON
 if 'meter' in test_params:
     METER_CONNECTED = False
@@ -68,6 +68,7 @@ DE101 = DE10.DE10()
 if CONTROLLER_CONNECTED:
     controller = Controller.Controller(controller_port)
 
+# ブレーキ圧力計オブジェクト
 if METER_CONNECTED:
     meter = Meter.Meter(meter_port)
 

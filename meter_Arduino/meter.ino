@@ -32,7 +32,7 @@ void loop() {
   myServo.write(angle);
 
   // wait for the servo to get there 
-  delay(100);
+  delay(1);
 }
 
 

@@ -15,7 +15,7 @@ class DE10:
         #非常ブレーキ状態
         self.eb = False
         #貨車牽引時の加速度減少(単機: 1)
-        self.freight = 0.6
+        self.freight = 0.9
         #統合モジュールのボタン状態(intでビット列)
         # 初期値は前進、本線、鍵ON
         self.buttons = 0b01000000 + 0b00010000 + 0b00001000
@@ -40,18 +40,18 @@ class DE10:
             self.accel_relay = True
         
         # 加速度を求める(m/s2)
-        if self.speed < 12:
+        if self.speed < 3.33:
             accel = self.getSmoothLevel() * 0.803
-        elif 12 <= self.speed < 25:
+        elif self.speed < 6.94:
             accel = self.getSmoothLevel() * 0.5
-        elif 25 <= self.speed < 35:
+        elif self.speed < 9.72:
             accel = self.getSmoothLevel() * 0.333
-        elif 35 <= self.speed < 45:
+        elif self.speed < 12.5:
             accel = self.getSmoothLevel() * 0.222
-        elif 45 <= self.speed:
+        elif self.speed < 23.5:
             accel = self.getSmoothLevel() * 0.194
         # 最高速度では加速は0になる
-        elif 25 < self.speed:
+        else:
             accel = 0
 
         # 走行中に切にすると停車までクラッチが切れる
