@@ -21,10 +21,12 @@ class SoundManager:
         
         # 頻繁に鳴る音はボリュームを合わせて1.0を超えないようにする
         self.run_max_volume = 0.2
-        self.s.power.volume(0.3)
-        self.s.joint.volume(0.5)
+        self.s.power.volume(0.1)
+        self.s.joint.volume(0.8)
         self.s.switch.volume(0.2)
-        self.s.idle.volume(0.15)
+        self.s.idle.volume(0.07)
+        self.s.brake.volume(0.7)
+        self.s.brake_fadeout.volume(0.7)
         self.s.idle.play()
 
     def brake(self, bc):

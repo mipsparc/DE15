@@ -37,11 +37,11 @@ class Controller:
             return
         
         # 動き始める速度
-        base_power = 42
+        base_power = 54
         
         #出力値の傾き
-        magnify_1 = 1.9
-        magnify_2 = 1.6
+        magnify_1 = 2.1
+        magnify_2 = 2.0
         
         #傾きが変化する閾値
         criteria = 3.0
