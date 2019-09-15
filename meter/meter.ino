@@ -1,6 +1,6 @@
-#include <Servo.h>
+#include <VarSpeedServo.h>
 
-Servo myServo;  // create a servo object 
+VarSpeedServo myServo;  // create a servo object 
 
 int angle = 0;   // variable to hold the angle for the servo motor
 int last_angle = 0;
@@ -29,10 +29,7 @@ void loop() {
   Serial.println(angle); 
 
   // set the servo position  
-  myServo.write(angle);
-
-  // wait for the servo to get there 
-  delay(1);
+  myServo.write(angle, 17, true);
 }
 
 
