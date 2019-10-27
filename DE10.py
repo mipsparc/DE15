@@ -21,8 +21,6 @@ class DE10:
         self.buttons = 0b01000000 + 0b00010000 + 0b00001000
         # クラッチがつながっているか
         self.clutch = True
-        #力行継電器がONか
-        self.accel_relay = True
         
     def getSmoothLevel(self):
         # y = log2(x+1) 最大が1
@@ -30,15 +28,6 @@ class DE10:
 
     # 0.1秒進める
     def advanceTime(self):
-        # ブレーキ中に力行すると力行継電器が切れる
-        if self.brake_level > 0 and self.mascon_level > 0:
-            self.accel_relay = False
-        if not self.accel_relay:
-            self.mascon_level = 0
-        # ノッチオフで力行継電器ON
-        if self.mascon_level == 0:
-            self.accel_relay = True
-        
         # 加速度を求める(m/s2)
         if self.speed < 3.33:
             accel = self.getSmoothLevel() * 0.803
@@ -68,14 +57,15 @@ class DE10:
 
         # 0.1秒あたりのブレーキレバー作用(max ±1.9m/s3) ここは実物に則さない
         if self.isKeyEnabled():
+            # bc: 減速度(m/s2) ここは実物に則さない
             self.bc += self.brake_level * 1.9 * 0.1
         # キーSWが運転位置にない場合は固定
         else:
             print('固定位置')
         
-        # 減速度(m/s2) ここは実物に則さない
-        if self.bc < 0:
-            self.bc = 0
+        # 走行抵抗
+        if self.bc < 0.06:
+            self.bc = 0.055
         elif self.bc > self.BC_MAX:
             self.bc = self.BC_MAX
             
