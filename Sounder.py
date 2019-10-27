@@ -1,6 +1,5 @@
 #coding:utf-8
 import pygame
-import time
 
 class Sounder:
     def __init__(self):
@@ -8,7 +7,7 @@ class Sounder:
         self.idle = Sounds(['sound/idle.wav'])
         self.switch = Sounds(['sound/switch.wav'], False)
         self.brake = Sounds(['sound/brake.wav'])
-        self.brake_fadeout = Sounds(['sound/brake_fadeout.wav'],False)
+        self.brake_fadeout = Sounds(['sound/brake_fadeout.wav'], False)
         self.power = Sounds([
             'sound/power_1_2.wav',
             'sound/power_3_4.wav',
@@ -16,6 +15,7 @@ class Sounder:
             'sound/power_7_8.wav',
             'sound/power_9_10_11_12_13_14.wav',
         ])
+        self.power_high = Sounds(['sound/power_high.wav'])
         self.joint = Sounds(['sound/joint.wav'], False)
         self.run = Sounds(['sound/run.wav'])
         
