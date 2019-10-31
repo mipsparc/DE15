@@ -64,7 +64,7 @@ class DE10:
             print('固定位置')
         
         # 走行抵抗
-        if self.bc < 0.06:
+        if self.bc < 0.06 and self.mascon_level = 0:
             self.bc = 0.055
         elif self.bc > self.BC_MAX:
             self.bc = self.BC_MAX
