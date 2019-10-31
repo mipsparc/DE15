@@ -21,12 +21,11 @@ class SoundManager:
         
         # 頻繁に鳴る音はボリュームを合わせて1.0を超えないようにする
         self.run_max_volume = 0.2
-        self.s.power.volume(0.08)
-        self.power_high_max_volume = 0.3 # 小さいので割る3するとちょうどよい程度
+        self.s.power.volume(0.1)
         self.s.joint.volume(0.8)
         self.s.switch.volume(0.2)
         self.s.idle.volume(0.07)
-        self.s.brake.volume(0.6)
+        self.s.brake.volume(0.7)
         self.s.brake_fadeout.volume(0.7)
         self.s.idle.play()
 
@@ -91,24 +90,17 @@ class SoundManager:
             num = 0
         elif mascon_level in (3, 4):
             num = 1
-            self.s.power_high.volume(self.power_high_max_volume * 0.6)
         elif mascon_level in (5, 6):
-            self.s.power_high.volume(self.power_high_max_volume * 0.8)
             num = 2
         elif mascon_level in (7, 8):
-            self.s.power_high.volume(self.power_high_max_volume)
             num = 3
         else:
-            self.s.power_high.volume(self.power_high_max_volume)
             num = 4
 
         if num != self.power_num:
             self.s.power.stop()
             self.power_num = num
             if mascon_level == 0:
-                self.s.power_high.stop()
                 return
             self.s.power.play(num)
-            self.s.power_high.play()
-
         
