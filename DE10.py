@@ -59,12 +59,14 @@ class DE10:
         if self.isKeyEnabled():
             # bc: 減速度(m/s2) ここは実物に則さない
             self.bc += self.brake_level * 1.9 * 0.1
+            if self.bc < 0:
+                self.bc = 0
         # キーSWが運転位置にない場合は固定
         else:
             print('固定位置')
         
         # 走行抵抗
-        if self.bc < 0.06 and self.mascon_level = 0:
+        if self.bc < 0.06 and self.mascon_level == 0:
             self.bc = 0.055
         elif self.bc > self.BC_MAX:
             self.bc = self.BC_MAX
