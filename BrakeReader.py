@@ -43,7 +43,7 @@ class DE15Brake:
             self.ser = serial.Serial(device, timeout=0.3, write_timeout=0.3, inter_byte_timeout=0.3, baudrate=9600)
         except serial.serialutil.SerialException:
             print('正常にシリアルポートを開けませんでした。')
-            exit()
+            raise
         
         self.fix_value = self.read()
         self.value = self.fix_value # 初期値は固定位置のデータにしておく
@@ -73,7 +73,7 @@ class DE15Brake:
             return BrakeStatues.MAX_BRAKE
         elif brake_value < 9181:
             return BrakeStatues.BRAKE
-        elif brake_value < 9360:
+        elif brake_value < 9300:
             return BrakeStatues.RUN
         elif brake_value < 9700:
             return BrakeStatues.LOWER_BRAKE
@@ -108,9 +108,9 @@ class DE15Brake:
         self.ser.write(bytes([output]))
     '''
         
-    def main(self):
-        value = brake.read()
-        self.status = brake.valueToStatus(value)
+    def syncSharedMem(self):
+        value = self.read()
+        self.status = self.valueToStatus(value)
 
         # 異常時には状態表示をする
         if self.status in (BrakeStatues.ERROR, BrakeStatues.ERROR_SENSOR):
@@ -124,17 +124,19 @@ class DE15Brake:
         return {'status': self.status.value, 'level': self.brake_level}
     
 # シリアル通信プロセスのワーカー
-def Worker(brake_status_shared, brake_level_shared, speed_shared, device):
-    brake = BrakeReader('/dev/ttyACM0')
+def Worker(brake_status_shared, brake_level_shared, device):
+    brake = DE15Brake('/dev/ttyACM0')
     while True:
         try:
-            result = brake.waitAndGetData()
+            result = brake.syncSharedMem()
             # 不正値の読み飛ばし
-            if (result['status'] == BrakeStatus.ERROR_SENSOR or result['status'] == BrakeStatus.ERROR):
+            if (result['status'] == BrakeStatues.ERROR_SENSOR or result['status'] == BrakeStatues.ERROR):
                 continue;
             brake_status_shared.value = result['status']
             brake_level_shared.value = result['level']
             # brake.setSpeed(speed_shared.value)
+        except serial.serialutil.SerialException:
+            raise
         # できる限りエラーは無視する
         except Exception as e:
             print(e, file=sys.stderr)
@@ -143,4 +145,4 @@ def Worker(brake_status_shared, brake_level_shared, speed_shared, device):
 if __name__ == '__main__':
     brake = DE15Brake('/dev/ttyACM0')
     while True:
-        print(brake.main())
+        print(brake.syncSharedMem())

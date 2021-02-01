@@ -56,7 +56,7 @@ brake_status_shared = Value('i', int(BrakeStatues.FIX))
 brake_level_shared = Value('f', 0.0)
 speed_shared = Value('i', 0)
 if BRAKE_CONNECTED:
-    brake_process = Process(target=BrakeReader.Worker, args=(brake_status_shared, brake_level_shared, speed_shared, brake_port))
+    brake_process = Process(target=BrakeReader.Worker, args=(brake_status_shared, brake_level_shared, brake_port))
     # 親プロセスが死んだら自動的に終了
     brake_process.daemon = True
     brake_process.start()
@@ -83,7 +83,7 @@ while True:
         # ハードウェアからの入力を共有メモリから取り出す
         mascon_level = mascon_shared.value
         brake_status = brake_status_shared.value
-        brake_level = brake_shared.value
+        brake_level = brake_level_shared.value
 
         if not MASCON_CONNECTED:
             mascon_level = MASCON_TEST_VALUE
@@ -95,13 +95,14 @@ while True:
         DE101.setBrakeStatus(brake_status)
         DE101.setBrake(brake_level)
         DE101.advanceTime()
-        speed = DE101.getSpeed()
-        
+        #speed = DE101.getSpeed()
+        speed = 0
+                
         kph = speed * 3600 / 1000
         # 速度計に現在車速を与える
         speed_shared.value = int(kph)
         
-        print('{}km/h BP: {} BC: {}'.format(int(kph), int(DE101.getBp()), int(490 - DE101.getBp())))
+        #print('{}km/h BP: {} BC: {}'.format(int(kph), int(DE101.getBp()), int(490 - DE101.getBp())))
 
         # 音を出す
         Sound.brake(DE101.bc)

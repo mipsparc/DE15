@@ -12,19 +12,24 @@ class DE10:
     def __init__(self):
         # 車速(m/s)
         self.speed = 0
+        # マスコンノッチ(0-14)
         self.mascon_level = 0
-        # 最大ブレーキシリンダ圧力 本物は5.7kg/cm2
+        # 非常ブレーキシリンダ圧力
+        self.BC_MAX_EB = 4.0
+        # 常用最大ブレーキシリンダ圧力 本物は5.7kg/cm2
         self.BC_MAX = 3.0
         # ブレーキシリンダ圧力(減速度)
         self.bc = self.BC_MAX
         # ブレーキ装置状態
         self.brake_status = BrakeStatues.FIX
-        # ブレーキレバー位置(ブレーキシリンダ圧力に作用)
+        # 0(運転) ~ 1(全ブレーキ) のブレーキレベル
         self.brake_level = 0
         # 非常ブレーキ状態
         self.eb = False
         # 貨車牽引時の加速度減少(単機: 1)
         self.freight = 0.9
+        # 目標ブレーキシリンダ圧力
+        self.goal_bc = self.BC_MAX
         
     def getSmoothLevel(self):
         # y = log2(x+1) 最大が1
@@ -47,20 +52,39 @@ class DE10:
         else:
             accel = 0
 
-        # 切位置時かクラッチ切れ時は空吹かしになって加速はしない
+        # 切位置時は空吹かしになって加速はしない
         if self.getWay() == 0:
             print('空吹かし')
             accel = 0
+                        
+        # ブレーキ装置状態から目標ブレーキシリンダ圧を求める
+        if self.brake_status in (BrakeStatues.ERROR_SENSOR, BrakeStatues.ERROR, BrakeStatues.EMER):
+            self.eb = True
+        elif self.brake_status in (BrakeStatues.FIX, BrakeStatues.MAX_BRAKE):
+            self.goal_bc = self.BC_MAX
+        elif self.brake_status == BrakeStatues.BRAKE:
+            self.goal_bc = round(self.BC_MAX * self.brake_level, 2)
+        elif self.brake_status == BrakeStatues.RUN:
+            self.goal_bc = 0.0
+        elif self.brake_status == BrakeStatues.LOWER_BRAKE:
+            self.goal_bc = 0.0
 
-        # 0.1秒あたりのブレーキレバー作用(max ±1.9m/s3) ここは実物に則さない
-        if self.isKeyEnabled():
-            # bc: 減速度(m/s2) ここは実物に則さない
-            self.bc += self.brake_level * 1.9 * 0.1
-            if self.bc < 0:
-                self.bc = 0
-        # キーSWが運転位置にない場合は固定
+        # 0.1秒あたりのブレーキ作用・寛解 ここは実物に則さない
+        # bc: 減速度(m/s2)とする。ここも実物に則さない
+        if abs(self.bc - self.goal_bc) < 0.1:
+            self.bc = self.goal_bc
+        elif self.bc > self.goal_bc:
+            self.bc -= (self.bc - self.goal_bc) / 20.0
         else:
-            print('固定位置')
+            self.bc += (self.goal_bc - self.bc) / 20.0
+        
+        # 丸める
+        self.bc = round(self.bc, 2)
+        
+        if self.bc < 0.2:
+            self.bc = 0
+            
+        print(self.bc, self.goal_bc)
         
         # 走行抵抗
         if self.bc < 0.06 and self.mascon_level == 0:
@@ -75,7 +99,7 @@ class DE10:
 
         # 非常ブレーキ
         if self.eb:
-            self.bc = self.BC_MAX
+            self.bc = self.BC_MAX_EB
             self.setMascon(0)
             # 停車で復位
             if self.speed == 0:
@@ -84,6 +108,10 @@ class DE10:
 
     def getSpeed(self):
         return self.speed
+    
+    # 暫定で方向固定
+    def getWay(self):
+        return 1
     
     # 0 ~ 14のマスコンノッチを入力 EB時は力行不可
     def setMascon(self, mascon_level):
