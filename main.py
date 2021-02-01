@@ -6,6 +6,7 @@
 import DE10
 import MasconReader
 import BrakeReader
+from BrakeReader import BrakeStatues
 import Controller
 import SoundManager
 import Meter
@@ -52,11 +53,11 @@ if MASCON_CONNECTED:
     mascon_process.start()
 
 # ブレーキ読み書きプロセス起動、共有メモリ作成
-brake_shared = Value('f', 0.0)
-buttons_shared = Value('i', 0)
+brake_status_shared = Value('i', int(BrakeStatues.FIX))
+brake_level_shared = Value('f', 0.0)
 speed_shared = Value('i', 0)
 if BRAKE_CONNECTED:
-    brake_process = Process(target=BrakeReader.Worker, args=(brake_shared, buttons_shared, speed_shared, brake_port))
+    brake_process = Process(target=BrakeReader.Worker, args=(brake_status_shared, brake_level_shared, speed_shared, brake_port))
     # 親プロセスが死んだら自動的に終了
     brake_process.daemon = True
     brake_process.start()
@@ -82,8 +83,9 @@ while True:
     try:
         # ハードウェアからの入力を共有メモリから取り出す
         mascon_level = mascon_shared.value
-        brake_level = brake_shared.value
-        buttons = buttons_shared.value
+        #brake_level = brake_shared.value
+        #buttons = buttons_shared.value
+        print(brake_status_shared.value)
         if not MASCON_CONNECTED:
             mascon_level = MASCON_TEST_VALUE
         if not BRAKE_CONNECTED:
