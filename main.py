@@ -102,7 +102,7 @@ while True:
         # 速度計に現在車速を与える
         speed_shared.value = int(kph)
         
-        #print('{}km/h BP: {} BC: {}'.format(int(kph), int(DE101.getBp()), int(490 - DE101.getBp())))
+        print('{}km/h  BC: {}'.format(int(kph), int(490 - DE101.getBp())))
 
         # 音を出す
         Sound.brake(DE101.bc)

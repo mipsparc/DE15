@@ -75,19 +75,17 @@ class DE10:
             self.bc = self.goal_bc
         elif self.bc > self.goal_bc:
             self.bc -= (self.bc - self.goal_bc) / 20.0
-        else:
+        elif self.bc < self.goal_bc:
             self.bc += (self.goal_bc - self.bc) / 20.0
         
         # 丸める
         self.bc = round(self.bc, 2)
         
-        if self.bc < 0.2:
+        if self.bc < 0:
             self.bc = 0
-            
-        print(self.bc, self.goal_bc)
-        
+
         # 走行抵抗
-        if self.bc < 0.06 and self.mascon_level == 0:
+        if self.bc < 0.06:
             self.bc = 0.055
         elif self.bc > self.BC_MAX:
             self.bc = self.BC_MAX
