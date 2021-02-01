@@ -40,7 +40,6 @@ if 'mascon' in test_params:
 if 'brake' in test_params:
     BRAKE_CONNECTED = False
     BRAKE_TEST_VALUE = -0.3
-    BUTTON_TEST_VALUE = 0b01000000 + 0b00010000 + 0b00001000 # 前進、本線、鍵ON
 if 'meter' in test_params:
     METER_CONNECTED = False
 
@@ -83,19 +82,18 @@ while True:
     try:
         # ハードウェアからの入力を共有メモリから取り出す
         mascon_level = mascon_shared.value
-        #brake_level = brake_shared.value
-        #buttons = buttons_shared.value
-        print(brake_status_shared.value)
+        brake_status = brake_status_shared.value
+        brake_level = brake_shared.value
+
         if not MASCON_CONNECTED:
             mascon_level = MASCON_TEST_VALUE
         if not BRAKE_CONNECTED:
             brake_level = BRAKE_TEST_VALUE
-            buttons = BUTTON_TEST_VALUE
         
         # DE10モデルオブジェクトに入力を与える
         DE101.setMascon(mascon_level)
+        DE101.setBrakeStatus(brake_status)
         DE101.setBrake(brake_level)
-        DE101.setButtons(buttons)
         DE101.advanceTime()
         speed = DE101.getSpeed()
         

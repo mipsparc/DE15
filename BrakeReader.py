@@ -2,6 +2,7 @@
 
 import serial
 from enum import IntEnum
+import sys
 
 class BrakeStatues(IntEnum):
     ERROR_SENSOR = 1
@@ -34,27 +35,6 @@ class BrakeStatusUtil:
         for e in self.NAMES.keys():
             if status_id == e.value:
                 return e
-
-'''
-class BrakeStatues:
-    ERROR = BrakeStatus(2, 'センサー異常')
-    EMER = BrakeStatus(3, '非常')
-    FIX = BrakeStatus(4, '固定')
-    MAX_BRAKE = BrakeStatus(5, '全ブレーキ')
-    BRAKE = BrakeStatus(6, 'ブレーキ帯')
-    RUN = BrakeStatus(7, '運転')
-    LOWER_BRAKE = BrakeStatus(8, 'ユルメ')
-    
-    @classmethod
-    def getStatusById(self, status_id):
-        for var in vars(self):
-            try:
-                if var.status_id == status_id:
-                    return var
-            except NameError:
-                continue
-        print('err')
-'''
 
 class DE15Brake:
     def __init__(self, device):
@@ -101,6 +81,9 @@ class DE15Brake:
             return BrakeStatues.ERROR
         
     '''
+    #
+    # 速度計を動かすようになったら有効化する
+    #
     # 速度計の針を動かす
     def setSpeed(self, speed):
         if speed == 0:
@@ -128,7 +111,11 @@ class DE15Brake:
     def main(self):
         value = brake.read()
         self.status = brake.valueToStatus(value)
-        # print(value)
+
+        # 異常時には状態表示をする
+        if self.status in (BrakeStatues.ERROR, BrakeStatues.ERROR_SENSOR):
+            print(BrakeStatusUtil.statusIdToName(self.status))
+            print(value)
 
         self.brake_level = 0
         if self.status == BrakeStatues.BRAKE:
@@ -149,7 +136,8 @@ def Worker(brake_status_shared, brake_level_shared, speed_shared, device):
             brake_level_shared.value = result['level']
             # brake.setSpeed(speed_shared.value)
         # できる限りエラーは無視する
-        except:
+        except Exception as e:
+            print(e, file=sys.stderr)
             pass
 
 if __name__ == '__main__':
