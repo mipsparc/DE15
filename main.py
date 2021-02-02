@@ -7,7 +7,7 @@ import DE10
 import MasconReader
 import BrakeReader
 from BrakeReader import BrakeStatues
-from DSAir2_v1 import DSair2
+import DSair2_v1
 import SoundManager
 import Meter
 from multiprocessing import Process, Value
@@ -66,11 +66,12 @@ if BRAKE_CONNECTED:
 # DE10のモデルオブジェクト
 DE101 = DE10.DE10()
 
-# DSAir2(DCCコマンドステーション)
+# DSair2(DCCコマンドステーション)
 if CONTROLLER_CONNECTED:
-    is_dcc = False
-    addr = 0
-    dsair2 = DSAir(dsair2_port, is_dcc, addr)
+    is_dcc = True
+    addr = 3
+    dsair2 = DSair2_v1.DSair2(dsair2_port, is_dcc, addr)
+    dsair2.move(0, 1)
 
 # ブレーキ圧力計オブジェクト
 if METER_CONNECTED:
@@ -81,6 +82,9 @@ Sound = SoundManager.SoundManager()
 
 # メインループを0.1秒おきに回すためのunix timeカウンタ
 last_counter = time.time()
+
+# 前のループで動いていたか
+last_move = False
 
 while True:
     try:
@@ -106,7 +110,7 @@ while True:
         # 速度計に現在車速を与える
         speed_shared.value = int(kph)
         
-        print('{}km/h  BC: {}'.format(int(kph), int(490 - DE101.getBp())))
+        # print('{}km/h  BC: {}'.format(int(kph), int(490 - DE101.getBp())))
 
         # 音を出す
         Sound.brake(DE101.bc)
@@ -114,10 +118,21 @@ while True:
         Sound.power(mascon_level)
         Sound.joint(speed)
         Sound.run(speed)
+        
+        print(kph, round(speed, 3))
 
         # DSAir2に速度と方向を渡す
         if CONTROLLER_CONNECTED:
-            dsair2.move(speed_level, mascon.way)
+            # 出力と変換する(値は適当)
+            speed_out = 0
+            if last_move:
+                additional = 0
+            else:
+                additional = 30
+            if speed > 0:
+                speed_out = speed * 20 + additional
+            dsair2.move(speed_out, DE101.getWay())
+            last_move = speed == 0
 
         if METER_CONNECTED:
             meter.send(DE101.bc)
