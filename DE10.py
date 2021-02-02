@@ -3,11 +3,7 @@
 import math
 from BrakeReader import BrakeStatues
 
-'''
-# 方針
-目標ブレーキシリンダ圧力を設定すると、ゆっくりとそこに向けて動いていく感じ
-'''
-
+# 日本国有鉄道DE10液体式ディーゼル機関車の動作を再現するライブラリ
 class DE10:
     def __init__(self):
         # 車速(m/s)
@@ -22,7 +18,7 @@ class DE10:
         self.bc = self.BC_MAX
         # ブレーキ装置状態
         self.brake_status = BrakeStatues.FIX
-        # 0(運転) ~ 1(全ブレーキ) のブレーキレベル
+        # 0(運転) - 1(全ブレーキ) のブレーキレベル
         self.brake_level = 0
         # 非常ブレーキ状態
         self.eb = False
@@ -60,6 +56,7 @@ class DE10:
         # ブレーキ装置状態から目標ブレーキシリンダ圧を求める
         if self.brake_status in (BrakeStatues.ERROR_SENSOR, BrakeStatues.ERROR, BrakeStatues.EMER):
             self.eb = True
+            self.goal_bc = self.BC_MAX_EB
         elif self.brake_status in (BrakeStatues.FIX, BrakeStatues.MAX_BRAKE):
             self.goal_bc = self.BC_MAX
         elif self.brake_status == BrakeStatues.BRAKE:
@@ -70,9 +67,10 @@ class DE10:
             self.goal_bc = 0.0
 
         # 0.1秒あたりのブレーキ作用・寛解 ここは実物に則さない
+        # 目標ブレーキシリンダ圧力を設定すると、ゆっくりとそこに向けて動いていく
         # bc: 減速度(m/s2)とする。ここも実物に則さない
         if abs(self.bc - self.goal_bc) < 0.1:
-            self.bc = self.goal_bc
+            self.goal_bc = self.bc
         elif self.bc > self.goal_bc:
             self.bc -= (self.bc - self.goal_bc) / 20.0
         elif self.bc < self.goal_bc:
@@ -97,7 +95,6 @@ class DE10:
 
         # 非常ブレーキ
         if self.eb:
-            self.bc = self.BC_MAX_EB
             self.setMascon(0)
             # 停車で復位
             if self.speed == 0:

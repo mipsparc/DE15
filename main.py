@@ -36,7 +36,7 @@ if 'controller' in test_params:
     CONTROLLER_CONNECTED = False
 if 'mascon' in test_params:
     MASCON_CONNECTED = False
-    MASCON_TEST_VALUE = 4
+    MASCON_TEST_VALUE = 7
 if 'brake' in test_params:
     BRAKE_CONNECTED = False
     BRAKE_TEST_VALUE = -0.3
@@ -95,8 +95,7 @@ while True:
         DE101.setBrakeStatus(brake_status)
         DE101.setBrake(brake_level)
         DE101.advanceTime()
-        #speed = DE101.getSpeed()
-        speed = 0
+        speed = DE101.getSpeed()
                 
         kph = speed * 3600 / 1000
         # 速度計に現在車速を与える
