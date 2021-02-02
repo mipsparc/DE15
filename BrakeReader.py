@@ -115,8 +115,6 @@ class DE15Brake:
         value = self.read()
         self.status = self.valueToStatus(value)
         
-        print(BrakeStatusUtil.statusIdToName(self.status))
-
         # 異常時には状態表示をする
         if self.status in (BrakeStatues.ERROR, BrakeStatues.ERROR_SENSOR):
             print(BrakeStatusUtil.statusIdToName(self.status))

@@ -7,7 +7,7 @@ import DE10
 import MasconReader
 import BrakeReader
 from BrakeReader import BrakeStatues
-import Controller
+from DSAir2_v1 import DSair2
 import SoundManager
 import Meter
 from multiprocessing import Process, Value
@@ -18,8 +18,9 @@ import os
 # 各装置のデバイスファイル(udevファイルを読み込ませていればこのまま)
 mascon_port = '/dev/mascon'
 brake_port = '/dev/brake'
-controller_port = '/dev/controller'
 meter_port = '/dev/meter'
+# DSair2のシリアルポート。Linuxでほかに機器がなければこのまま
+dsair2_port = '/dev/ttyUSB0'
 
 # 標準エラー出力をログファイルにする
 os.makedirs('log', exist_ok=True)
@@ -65,9 +66,11 @@ if BRAKE_CONNECTED:
 # DE10のモデルオブジェクト
 DE101 = DE10.DE10()
 
-# PWMコントローラオブジェクト
+# DSAir2(DCCコマンドステーション)
 if CONTROLLER_CONNECTED:
-    controller = Controller.Controller(controller_port)
+    is_dcc = False
+    addr = 0
+    dsair2 = DSAir(dsair2_port, is_dcc, addr)
 
 # ブレーキ圧力計オブジェクト
 if METER_CONNECTED:
@@ -112,9 +115,9 @@ while True:
         Sound.joint(speed)
         Sound.run(speed)
 
-        # PWMコントローラライブラリに速度などを渡す
+        # DSAir2に速度と方向を渡す
         if CONTROLLER_CONNECTED:
-            controller.move(speed, DE101.getWay(), DE101.isHonsenEnabled())
+            dsair2.move(speed_level, mascon.way)
 
         if METER_CONNECTED:
             meter.send(DE101.bc)
@@ -128,8 +131,8 @@ while True:
     except KeyboardInterrupt:
         # 終了時に走行が停止して、速度計が0になるようにする
         if CONTROLLER_CONNECTED:
-            controller.move(0, 0, False)
-            controller.move(0, 0, False)
+            dsair2.move(0, 0)
+            dsair2.move(0, 0)
         if BRAKE_CONNECTED:
             speed_shared.value = 0
 

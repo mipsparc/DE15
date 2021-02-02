@@ -52,9 +52,7 @@ class DE10:
         if self.getWay() == 0:
             print('空吹かし')
             accel = 0
-            
-        print(self.brake_level)
-                        
+
         # ブレーキ装置状態から目標ブレーキシリンダ圧を求める
         if self.brake_status in (BrakeStatues.ERROR_SENSOR, BrakeStatues.ERROR, BrakeStatues.EMER):
             self.eb = True
@@ -74,9 +72,9 @@ class DE10:
         if abs(self.bc - self.goal_bc) < 0.1:
             self.goal_bc = self.bc
         elif self.bc > self.goal_bc:
-            self.bc -= (self.bc - self.goal_bc) / 20.0
+            self.bc -= (self.bc - self.goal_bc) / 15.0
         elif self.bc < self.goal_bc:
-            self.bc += (self.goal_bc - self.bc) / 20.0
+            self.bc += (self.goal_bc - self.bc) / 15.0
         
         # 丸める
         self.bc = round(self.bc, 2)
@@ -91,7 +89,7 @@ class DE10:
             self.bc = self.BC_MAX_EB
             
         # 加減速計算
-        self.speed = self.speed + (accel - self.bc / 5) * 0.1 * self.freight
+        self.speed = self.speed + (accel - self.bc / 4) * 0.1 * self.freight
         if self.speed < 0:
             self.speed = 0
 
