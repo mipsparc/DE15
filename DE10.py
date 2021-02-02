@@ -22,8 +22,8 @@ class DE10:
         self.brake_level = 0
         # 非常ブレーキ状態
         self.eb = False
-        # 貨車牽引時の加速度減少(単機: 1)
-        self.freight = 0.9
+        # 客貨車牽引時の加速度減少(単機: 1)
+        self.freight = 0.7
         # 目標ブレーキシリンダ圧力
         self.goal_bc = self.BC_MAX
         
@@ -85,8 +85,8 @@ class DE10:
         # 走行抵抗
         if self.bc < 0.06:
             self.bc = 0.055
-        elif self.bc > self.BC_MAX:
-            self.bc = self.BC_MAX
+        elif self.bc > self.BC_MAX_EB:
+            self.bc = self.BC_MAX_EB
             
         # 加減速計算
         self.speed = self.speed + (accel - self.bc) * 0.1 * self.freight
@@ -99,7 +99,6 @@ class DE10:
             # 停車で復位
             if self.speed == 0:
                 self.eb = False
-                self.setBrake(0)
 
     def getSpeed(self):
         return self.speed

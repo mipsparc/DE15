@@ -39,7 +39,8 @@ if 'mascon' in test_params:
     MASCON_TEST_VALUE = 7
 if 'brake' in test_params:
     BRAKE_CONNECTED = False
-    BRAKE_TEST_VALUE = -0.3
+    BRAKE_STATUS_TEST_VALUE = BrakeStatues.RUN
+    BRAKE_LEVEL_TEST_VALUE = 0
 if 'meter' in test_params:
     METER_CONNECTED = False
 
@@ -88,7 +89,8 @@ while True:
         if not MASCON_CONNECTED:
             mascon_level = MASCON_TEST_VALUE
         if not BRAKE_CONNECTED:
-            brake_level = BRAKE_TEST_VALUE
+            brake_status = BRAKE_STATUS_TEST_VALUE
+            brake_level = BRAKE_LEVEL_TEST_VALUE
         
         # DE10モデルオブジェクトに入力を与える
         DE101.setMascon(mascon_level)
