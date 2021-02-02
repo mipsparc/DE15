@@ -94,10 +94,9 @@ class DE15Brake:
             return BrakeStatues.BRAKE
         elif brake_value < 12000:
             return BrakeStatues.RUN
-        elif brake_value < 12400:
-            return BrakeStatues.LOWER_BRAKE
+        #elif brake_value < 12400:
         else:
-            return BrakeStatues.ERROR
+            return BrakeStatues.LOWER_BRAKE
         
     '''
     #
@@ -129,7 +128,6 @@ class DE15Brake:
         
     def syncSharedMem(self):
         value = self.read()
-        print(value)
         self.status = self.valueToStatus(value)
 
         # 異常時には状態表示をする
