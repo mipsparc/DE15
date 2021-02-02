@@ -63,8 +63,12 @@ class DE15Brake:
             return False
 
     def valueToStatus(self, brake_value):
+        self.step_brake = True
         if brake_value == False:
             return BrakeStatues.ERROR_SENSOR
+        elif brake_value < 7000:
+            return BrakeStatues.ERROR
+        # 階ユルメ
         elif brake_value < 7980:
             return BrakeStatues.EMER
         elif brake_value < 8100:
@@ -76,6 +80,21 @@ class DE15Brake:
         elif brake_value < 9300:
             return BrakeStatues.RUN
         elif brake_value < 9700:
+            return BrakeStatues.LOWER_BRAKE
+
+        # 全ユルメ
+        self.step_brake = False
+        if brake_value < 10600:
+            return BrakeStatues.EMER
+        elif brake_value < 10800:
+            return BrakeStatues.FIX
+        elif brake_value < 10900:
+            return BrakeStatues.MAX_BRAKE
+        elif brake_value < 11765:
+            return BrakeStatues.BRAKE
+        elif brake_value < 12000:
+            return BrakeStatues.RUN
+        elif brake_value < 12400:
             return BrakeStatues.LOWER_BRAKE
         else:
             return BrakeStatues.ERROR
@@ -110,6 +129,7 @@ class DE15Brake:
         
     def syncSharedMem(self):
         value = self.read()
+        print(value)
         self.status = self.valueToStatus(value)
 
         # 異常時には状態表示をする
@@ -119,7 +139,10 @@ class DE15Brake:
 
         self.brake_level = 0
         if self.status == BrakeStatues.BRAKE:
-            self.brake_level = 1 - (float(value) - 8260) / (9181 - 8260)
+            if self.step_brake:
+                self.brake_level = 1 - (float(value) - 8260) / (9181 - 8260)
+            else:
+                self.brake_level = 1 - ((float(value) - 10900) / (11765 - 10900))
             
         return {'status': self.status.value, 'level': self.brake_level}
     

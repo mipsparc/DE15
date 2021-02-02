@@ -23,7 +23,7 @@ class DE10:
         # 非常ブレーキ状態
         self.eb = False
         # 客貨車牽引時の加速度減少(単機: 1)
-        self.freight = 0.7
+        self.freight = 0.8
         # 目標ブレーキシリンダ圧力
         self.goal_bc = self.BC_MAX
         
@@ -52,6 +52,8 @@ class DE10:
         if self.getWay() == 0:
             print('空吹かし')
             accel = 0
+            
+        print(self.brake_level)
                         
         # ブレーキ装置状態から目標ブレーキシリンダ圧を求める
         if self.brake_status in (BrakeStatues.ERROR_SENSOR, BrakeStatues.ERROR, BrakeStatues.EMER):
@@ -89,7 +91,7 @@ class DE10:
             self.bc = self.BC_MAX_EB
             
         # 加減速計算
-        self.speed = self.speed + (accel - self.bc) * 0.1 * self.freight
+        self.speed = self.speed + (accel - self.bc / 5) * 0.1 * self.freight
         if self.speed < 0:
             self.speed = 0
 
