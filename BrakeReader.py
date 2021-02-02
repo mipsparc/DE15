@@ -138,11 +138,14 @@ class DE15Brake:
         self.brake_level = 0
         if self.status == BrakeStatues.BRAKE:
             if self.step_brake:
-                self.brake_level = 1 - (float(value) - 8260) / (9181 - 8260)
+                self.brake_level = self.getBrakeLevel(8260, 9181)
             else:
-                self.brake_level = 1 - ((float(value) - 10900) / (11765 - 10900))
+                self.brake_level = self.getBrakeLevel(10900, 11765)
             
         return {'status': self.status.value, 'level': self.brake_level}
+    
+    def getBrakeLevel(self, value, max_brake, brake):
+        return 1 - (float(value) - max_brake) / (brake - max_brake)
     
 # シリアル通信プロセスのワーカー
 def Worker(brake_status_shared, brake_level_shared, device):
