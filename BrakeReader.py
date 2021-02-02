@@ -63,40 +63,25 @@ class DE15Brake:
             return False
 
     def valueToStatus(self, brake_value):
-        self.step_brake = True
         if brake_value == False:
             return BrakeStatues.ERROR_SENSOR
-        elif brake_value < 7000:
+        elif brake_value < 5500:
             return BrakeStatues.ERROR
         # 階ユルメ
-        elif brake_value < 7980:
+        elif brake_value < 5760:
             return BrakeStatues.EMER
-        elif brake_value < 8100:
+        elif brake_value < 5800:
             return BrakeStatues.FIX
-        elif brake_value < 8260:
+        elif brake_value < 5830:
             return BrakeStatues.MAX_BRAKE
-        elif brake_value < 9181:
+        elif brake_value < 6100:
             return BrakeStatues.BRAKE
-        elif brake_value < 9300:
+        elif brake_value < 6130:
             return BrakeStatues.RUN
-        elif brake_value < 9700:
+        elif brake_value < 6230:
             return BrakeStatues.LOWER_BRAKE
 
-        # 全ユルメ
-        self.step_brake = False
-        if brake_value < 10600:
-            return BrakeStatues.EMER
-        elif brake_value < 10800:
-            return BrakeStatues.FIX
-        elif brake_value < 10900:
-            return BrakeStatues.MAX_BRAKE
-        elif brake_value < 11765:
-            return BrakeStatues.BRAKE
-        elif brake_value < 12000:
-            return BrakeStatues.RUN
-        #elif brake_value < 12400:
-        else:
-            return BrakeStatues.LOWER_BRAKE
+        return BrakeStatues.ERROR
         
     '''
     #
@@ -129,6 +114,8 @@ class DE15Brake:
     def syncSharedMem(self):
         value = self.read()
         self.status = self.valueToStatus(value)
+        
+        print(BrakeStatusUtil.statusIdToName(self.status))
 
         # 異常時には状態表示をする
         if self.status in (BrakeStatues.ERROR, BrakeStatues.ERROR_SENSOR):
@@ -137,10 +124,7 @@ class DE15Brake:
 
         self.brake_level = 0
         if self.status == BrakeStatues.BRAKE:
-            if self.step_brake:
-                self.brake_level = self.getBrakeLevel(8260, 9181)
-            else:
-                self.brake_level = self.getBrakeLevel(10900, 11765)
+            self.brake_level = self.getBrakeLevel(value, 5830, 6100)
             
         return {'status': self.status.value, 'level': self.brake_level}
     
