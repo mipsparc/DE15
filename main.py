@@ -17,8 +17,8 @@ import os
 
 # 各装置のデバイスファイル(udevファイルを読み込ませていればこのまま)
 mascon_port = '/dev/mascon'
-brake_port = '/dev/brake'
 meter_port = '/dev/meter'
+brake_port = '/dev/ttyACM0'
 # DSair2のシリアルポート。Linuxでほかに機器がなければこのまま
 dsair2_port = '/dev/ttyUSB0'
 
@@ -118,7 +118,6 @@ while True:
         
         # DSAir2に速度と方向を渡す
         if CONTROLLER_CONNECTED:
-            # 出力と変換する(値は適当)
             calcDE15SpeedOut(speed)
             dsair2.move(speed_out, DE101.getWay())
             last_move = speed == 0
@@ -145,6 +144,7 @@ while True:
 
         raise
     
+# 出力と変換する(値は適当)
 def calcDE15SpeedOut(speed):
     if speed <= 0:
         return 0

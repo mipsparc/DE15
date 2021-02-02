@@ -72,9 +72,9 @@ class DE10:
         if abs(self.bc - self.goal_bc) < 0.1:
             self.goal_bc = self.bc
         elif self.bc > self.goal_bc:
-            self.bc -= (self.bc - self.goal_bc) / 15.0
+            self.bc -= (self.bc - self.goal_bc) / 10.0
         elif self.bc < self.goal_bc:
-            self.bc += (self.goal_bc - self.bc) / 15.0
+            self.bc += (self.goal_bc - self.bc) / 10.0
         
         # 丸める
         self.bc = round(self.bc, 2)
@@ -89,7 +89,7 @@ class DE10:
             self.bc = self.BC_MAX_EB
             
         # 加減速計算
-        self.speed = self.speed + (accel - self.bc / 4) * 0.1 * self.freight
+        self.speed = self.speed + (accel - self.bc / 1.5) * 0.1 * self.freight
         if self.speed < 0:
             self.speed = 0
 
