@@ -83,9 +83,6 @@ Sound = SoundManager.SoundManager()
 # メインループを0.1秒おきに回すためのunix timeカウンタ
 last_counter = time.time()
 
-# 前のループで動いていたか
-last_move = False
-
 while True:
     try:
         # ハードウェアからの入力を共有メモリから取り出す
@@ -110,7 +107,7 @@ while True:
         # 速度計に現在車速を与える
         speed_shared.value = int(kph)
         
-        # print('{}km/h  BC: {}'.format(int(kph), int(490 - DE101.getBp())))
+        print('{}km/h  BC: {}'.format(int(kph), int(490 - DE101.getBp())))
 
         # 音を出す
         Sound.brake(DE101.bc)
@@ -119,18 +116,10 @@ while True:
         Sound.joint(speed)
         Sound.run(speed)
         
-        print(kph, round(speed, 3))
-
         # DSAir2に速度と方向を渡す
         if CONTROLLER_CONNECTED:
             # 出力と変換する(値は適当)
-            speed_out = 0
-            if last_move:
-                additional = 0
-            else:
-                additional = 30
-            if speed > 0:
-                speed_out = speed * 20 + additional
+            calcDE15SpeedOut(speed)
             dsair2.move(speed_out, DE101.getWay())
             last_move = speed == 0
 
@@ -155,3 +144,8 @@ while True:
         time.sleep(0.5)
 
         raise
+    
+def calcDE15SpeedOut(speed):
+    if speed <= 0:
+        return 0
+    return speed * 20
