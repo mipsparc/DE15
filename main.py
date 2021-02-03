@@ -27,7 +27,7 @@ os.makedirs('log', exist_ok=True)
 sys.stderr = open('log/' + str(int(time.time())) + '.txt', 'w')
 
 # 引数として接続されていないものを渡す
-# ex) python3 ./main.py controller mascon hid
+# ex) python3 main.py controller mascon hid
 CONTROLLER_CONNECTED = True
 MASCON_CONNECTED = True
 HID_CONNECTED = True
