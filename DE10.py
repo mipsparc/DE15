@@ -79,15 +79,12 @@ class DE10:
         # 丸める
         self.bc = round(self.bc, 2)
         
-        if self.bc < 0:
-            self.bc = 0
-
         # 走行抵抗
-        if self.bc < 0.06:
-            self.bc = 0.055
+        if self.bc < 0.1:
+            self.bc = 0.1
         elif self.bc > self.BC_MAX_EB:
             self.bc = self.BC_MAX_EB
-            
+
         # 加減速計算
         self.speed = self.speed + (accel - self.bc / 1.5) * 0.1 * self.freight
         if self.speed < 0:
