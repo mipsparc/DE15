@@ -89,16 +89,19 @@ while True:
         mascon_level = mascon_shared.value
         brake_status = brake_status_shared.value
         brake_level = brake_level_shared.value
-
-        if not MASCON_CONNECTED:
+        
+        if MASCON_CONNECTED:
             if not mascon_process.is_alive():
                 print('マスコンプロセスが停止しています')
                 raise SystemError
+        else:
             mascon_level = MASCON_TEST_VALUE
-        if not BRAKE_CONNECTED:
+            
+        if BRAKE_CONNECTED:
             if not brake_process.is_alive():
                 print('ブレーキプロセスが停止しています')
                 raise SystemError
+        else:
             brake_status = BRAKE_STATUS_TEST_VALUE
             brake_level = BRAKE_LEVEL_TEST_VALUE
         
