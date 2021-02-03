@@ -53,7 +53,7 @@ if MASCON_CONNECTED:
 # HID読み書きプロセス起動、共有メモリ作成
 brake_status_shared = Value('i', int(BrakeStatues.FIX))
 brake_level_shared = Value('f', 0.0)
-speed_shared = Value('i', 0)
+speedmeter_shared = Value('i', 0)
 if HID_CONNECTED:
     hid_process = Process(target=HID.Worker, args=(brake_status_shared, brake_level_shared, hid_port))
     # 親プロセスが死んだら自動的に終了
@@ -109,7 +109,7 @@ while True:
                 
         kph = speed * 3600 / 1000
         # 速度計に現在車速を与える
-        speed_shared.value = int(kph)
+        speedmeter_shared.value = int(kph)
         
         print('{}km/h  BC: {}'.format(int(kph), int(490 - DE101.getBp())))
 
@@ -141,7 +141,7 @@ while True:
             dsair2.move(0, 0)
             dsair2.move(0, 0)
         if HID_CONNECTED:
-            speed_shared.value = 0
+            speedmeter_shared.value = 0
 
         # 速度計0が伝搬するまで待つ
         time.sleep(0.5)

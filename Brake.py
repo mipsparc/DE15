@@ -37,7 +37,8 @@ class BrakeStatusUtil:
                 return e
 
 class DE15Brake:
-    def valueToStatus(self, brake_value):
+    @staticmethod
+    def valueToStatus(brake_value):
         if brake_value == False:
             return BrakeStatues.ERROR_SENSOR
         elif brake_value < 5500:
@@ -57,7 +58,12 @@ class DE15Brake:
             return BrakeStatues.LOWER_BRAKE
 
         return BrakeStatues.ERROR
+    
+    @staticmethod
+    def getBrakeLevel(value, max_brake, brake):
+        return 1 - (float(value) - max_brake) / (brake - max_brake)
         
+    @classmethod
     def formatValue(self, value):
         status = self.valueToStatus(value)
         
@@ -72,7 +78,3 @@ class DE15Brake:
             brake_level = self.getBrakeLevel(value, 5830, 6100)
             
         return {'status': status.value, 'level': brake_level}
-    
-    def getBrakeLevel(self, value, max_brake, brake):
-        return 1 - (float(value) - max_brake) / (brake - max_brake)
-

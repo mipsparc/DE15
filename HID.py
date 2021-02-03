@@ -39,8 +39,7 @@ def Worker(brake_status_shared, brake_level_shared, device):
             raise
         
 def syncBrake(brake_value, brake_status_shared, brake_level_shared):
-    de15 = DE15Brake()
-    brake_result = de15.formatValue(brake_value)
+    brake_result = DE15Brake.formatValue(brake_value)
     # 不正値の読み飛ばし
     if brake_result == False:
         return

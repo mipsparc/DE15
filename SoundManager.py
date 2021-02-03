@@ -25,8 +25,8 @@ class SoundManager:
         self.s.joint.volume(0.8)
         self.s.switch.volume(0.2)
         self.s.idle.volume(0.07)
-        self.s.brake.volume(0.7)
-        self.s.brake_fadeout.volume(0.7)
+        self.s.brake.volume(0.5)
+        self.s.brake_fadeout.volume(0.5)
         self.s.idle.play()
 
     def brake(self, bc):
