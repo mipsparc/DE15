@@ -5,8 +5,9 @@
 
 import DE10
 import MasconReader
-import BrakeReader
-from BrakeReader import BrakeStatues
+import Brake
+from Brake import BrakeStatues
+import HID
 import DSair2_v1
 import SoundManager
 import Meter
@@ -17,8 +18,7 @@ import os
 
 # 各装置のデバイスファイル(udevファイルを読み込ませていればこのまま)
 mascon_port = '/dev/mascon'
-meter_port = '/dev/meter'
-brake_port = '/dev/ttyACM0'
+hid_port = '/dev/ttyACM0'
 # DSair2のシリアルポート。Linuxでほかに機器がなければこのまま
 dsair2_port = '/dev/ttyUSB0'
 
@@ -27,23 +27,20 @@ os.makedirs('log', exist_ok=True)
 sys.stderr = open('log/' + str(int(time.time())) + '.txt', 'w')
 
 # 引数として接続されていないものを渡す
-# ex) python3 ./main.py controller mascon brake
+# ex) python3 ./main.py controller mascon hid
 CONTROLLER_CONNECTED = True
 MASCON_CONNECTED = True
-BRAKE_CONNECTED = True
-METER_CONNECTED = True
+HID_CONNECTED = True
 test_params = sys.argv[1:]
 if 'controller' in test_params:
     CONTROLLER_CONNECTED = False
 if 'mascon' in test_params:
     MASCON_CONNECTED = False
     MASCON_TEST_VALUE = 7
-if 'brake' in test_params:
-    BRAKE_CONNECTED = False
+if 'hid' in test_params:
+    HID_CONNECTED = False
     BRAKE_STATUS_TEST_VALUE = BrakeStatues.RUN
     BRAKE_LEVEL_TEST_VALUE = 0
-if 'meter' in test_params:
-    METER_CONNECTED = False
 
 # マスコン読み込みプロセス起動、共有メモリ作成
 mascon_shared = Value('i', 0)
@@ -53,15 +50,17 @@ if MASCON_CONNECTED:
     mascon_process.daemon = True
     mascon_process.start()
 
-# ブレーキ読み書きプロセス起動、共有メモリ作成
+# HID読み書きプロセス起動、共有メモリ作成
 brake_status_shared = Value('i', int(BrakeStatues.FIX))
 brake_level_shared = Value('f', 0.0)
 speed_shared = Value('i', 0)
-if BRAKE_CONNECTED:
-    brake_process = Process(target=BrakeReader.Worker, args=(brake_status_shared, brake_level_shared, brake_port))
+if HID_CONNECTED:
+    hid_process = Process(target=HID.Worker, args=(brake_status_shared, brake_level_shared, hid_port))
     # 親プロセスが死んだら自動的に終了
-    brake_process.daemon = True
-    brake_process.start()
+    hid_process.daemon = True
+    hid_process.start()
+    # ブレーキ圧力計オブジェクト
+    #meter = Meter.Meter(meter_port)
 
 # DE10のモデルオブジェクト
 DE101 = DE10.DE10()
@@ -72,10 +71,6 @@ if CONTROLLER_CONNECTED:
     addr = 3
     dsair2 = DSair2_v1.DSair2(dsair2_port, is_dcc, addr)
     dsair2.move(0, 1)
-
-# ブレーキ圧力計オブジェクト
-if METER_CONNECTED:
-    meter = Meter.Meter(meter_port)
 
 # サウンドシステム
 Sound = SoundManager.SoundManager()
@@ -97,9 +92,9 @@ while True:
         else:
             mascon_level = MASCON_TEST_VALUE
             
-        if BRAKE_CONNECTED:
-            if not brake_process.is_alive():
-                print('ブレーキプロセスが停止しています')
+        if HID_CONNECTED:
+            if not hid_process.is_alive():
+                print('HIDプロセスが停止しています')
                 raise SystemError
         else:
             brake_status = BRAKE_STATUS_TEST_VALUE
@@ -131,8 +126,8 @@ while True:
             dsair2.move(speed_out, DE101.getWay())
             last_move = speed == 0
 
-        if METER_CONNECTED:
-            meter.send(DE101.bc)
+        if HID_CONNECTED:
+            #meter.send(DE101.bc)
 
         # 0.1秒経過するまで待つ(sleepしないのは、音に影響するため)
         while (time.time() <= last_counter + 0.1):
@@ -145,7 +140,7 @@ while True:
         if CONTROLLER_CONNECTED:
             dsair2.move(0, 0)
             dsair2.move(0, 0)
-        if BRAKE_CONNECTED:
+        if HID_CONNECTED:
             speed_shared.value = 0
 
         # 速度計0が伝搬するまで待つ

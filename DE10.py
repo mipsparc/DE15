@@ -1,7 +1,7 @@
 #coding:utf-8
 
 import math
-from BrakeReader import BrakeStatues
+from Brake import BrakeStatues
 
 # 日本国有鉄道DE10液体式ディーゼル機関車の動作を再現するライブラリ
 class DE10:
