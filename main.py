@@ -126,7 +126,7 @@ while True:
             dsair2.move(speed_out, DE101.getWay())
             last_move = speed == 0
 
-        if HID_CONNECTED:
+        #if HID_CONNECTED:
             #meter.send(DE101.bc)
 
         # 0.1秒経過するまで待つ(sleepしないのは、音に影響するため)
