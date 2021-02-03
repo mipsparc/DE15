@@ -27,14 +27,19 @@ class HID:
             exit()
         except:
             return False
+        
+    def send(self, speed):
+        # 速度計接続を実装するまでpass
+        pass
 
 # シリアル通信プロセスのワーカー
-def Worker(brake_status_shared, brake_level_shared, device):
+def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, device):
     hid = HID(device)
     while True:
         try:
             brake_value = hid.readSerial()['brake']
             syncBrake(brake_value, brake_status_shared, brake_level_shared)
+            hid.send(speedmeter_shared.value)
         except serial.serialutil.SerialException:
             raise
         
@@ -45,14 +50,13 @@ def syncBrake(brake_value, brake_status_shared, brake_level_shared):
         return
     brake_status_shared.value = brake_result['status']
     brake_level_shared.value = brake_result['level']
-
     
     '''
     #
     # 速度計を動かすようになったら有効化する
     #
     # 速度計の針を動かす
-    def setSpeed(self, speed):
+    def setSpeedMeter(speed):
         if speed == 0:
             speed = 1
         if speed / 10 >= 9:

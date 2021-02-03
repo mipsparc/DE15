@@ -55,7 +55,7 @@ brake_status_shared = Value('i', int(BrakeStatues.FIX))
 brake_level_shared = Value('f', 0.0)
 speedmeter_shared = Value('i', 0)
 if HID_CONNECTED:
-    hid_process = Process(target=HID.Worker, args=(brake_status_shared, brake_level_shared, hid_port))
+    hid_process = Process(target=HID.Worker, args=(brake_status_shared, brake_level_shared, speedmeter_shared, hid_port))
     # 親プロセスが死んだら自動的に終了
     hid_process.daemon = True
     hid_process.start()
