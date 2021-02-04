@@ -27,7 +27,7 @@ class HID:
         
     def send(self, speed):
         speed_out = speed * 2
-        # 速度計接続を実装するまでpass
+        # 速度計への出力
         self.ser.write(f'speed:{speed_out}'.encode('ascii'))
 
 # シリアル通信プロセスのワーカー
