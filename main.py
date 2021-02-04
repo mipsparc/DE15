@@ -17,7 +17,6 @@ import sys
 import os
 
 # 各装置のデバイスファイル(udevファイルを読み込ませていればこのまま)
-mascon_port = '/dev/mascon'
 hid_port = '/dev/ttyACM0'
 # DSair2のシリアルポート。Linuxでほかに機器がなければこのまま
 dsair2_port = '/dev/ttyUSB0'
@@ -27,40 +26,39 @@ os.makedirs('log', exist_ok=True)
 sys.stderr = open('log/' + str(int(time.time())) + '.txt', 'w')
 
 # 引数として接続されていないものを渡す
-# ex) python3 main.py controller mascon hid
+# ex) python3 main.py controller hid
 CONTROLLER_CONNECTED = True
-MASCON_CONNECTED = True
 HID_CONNECTED = True
 test_params = sys.argv[1:]
 if 'controller' in test_params:
     CONTROLLER_CONNECTED = False
-if 'mascon' in test_params:
-    MASCON_CONNECTED = False
-    MASCON_TEST_VALUE = 7
 if 'hid' in test_params:
     HID_CONNECTED = False
     BRAKE_STATUS_TEST_VALUE = BrakeStatues.RUN
     BRAKE_LEVEL_TEST_VALUE = 0
-
-# マスコン読み込みプロセス起動、共有メモリ作成
-mascon_shared = Value('i', 0)
-if MASCON_CONNECTED:
-    mascon_process = Process(target=MasconReader.Worker, args=(mascon_shared, mascon_port))
-    # 親プロセスが死んだら自動的に終了
-    mascon_process.daemon = True
-    mascon_process.start()
+    
+# TODO: hidの中に入れる
+MASCON_TEST_VALUE = 7
 
 # HID読み書きプロセス起動、共有メモリ作成
 brake_status_shared = Value('i', int(BrakeStatues.FIX))
 brake_level_shared = Value('f', 0.0)
 speedmeter_shared = Value('i', 0)
+mascon_shared = Value('i', 0)
+
+mascon_shared.value = MASCON_TEST_VALUE
+
 if HID_CONNECTED:
-    hid_process = Process(target=HID.Worker, args=(brake_status_shared, brake_level_shared, speedmeter_shared, hid_port))
+    hid_process = Process(target=HID.Worker, args=(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, hid_port))
     # 親プロセスが死んだら自動的に終了
     hid_process.daemon = True
     hid_process.start()
     # ブレーキ圧力計オブジェクト
     #meter = Meter.Meter(meter_port)
+else:
+    brake_status = BRAKE_STATUS_TEST_VALUE
+    brake_level = BRAKE_LEVEL_TEST_VALUE
+    mascon_level = MASCON_TEST_VALUE
 
 # DE10のモデルオブジェクト
 DE101 = DE10.DE10()
@@ -84,21 +82,10 @@ while True:
         mascon_level = mascon_shared.value
         brake_status = brake_status_shared.value
         brake_level = brake_level_shared.value
-        
-        if MASCON_CONNECTED:
-            if not mascon_process.is_alive():
-                print('マスコンプロセスが停止しています')
-                raise SystemError
-        else:
-            mascon_level = MASCON_TEST_VALUE
             
-        if HID_CONNECTED:
-            if not hid_process.is_alive():
-                print('HIDプロセスが停止しています')
-                raise SystemError
-        else:
-            brake_status = BRAKE_STATUS_TEST_VALUE
-            brake_level = BRAKE_LEVEL_TEST_VALUE
+        if HID_CONNECTED and not hid_process.is_alive():
+            print('HIDプロセスが停止しています')
+            raise SystemError
         
         # DE10モデルオブジェクトに入力を与える
         DE101.setMascon(mascon_level)
