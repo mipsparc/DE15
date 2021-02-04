@@ -52,6 +52,11 @@ def syncBrake(brake_value, brake_status_shared, brake_level_shared):
     brake_status_shared.value = brake_result['status']
     brake_level_shared.value = brake_result['level']
     
+if __name__ == '__main__':
+    hid = HID('/dev/ttyACM0')
+    while True:
+        print(hid.readSerial())
+    
     '''
     #
     # 速度計を動かすようになったら有効化する
