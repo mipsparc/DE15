@@ -72,9 +72,9 @@ class DE10:
         if abs(self.bc - self.goal_bc) < 0.1:
             self.goal_bc = self.bc
         elif self.bc > self.goal_bc:
-            self.bc -= (self.bc - self.goal_bc) / 10.0
+            self.bc -= (self.bc - self.goal_bc) / 5.0
         elif self.bc < self.goal_bc:
-            self.bc += (self.goal_bc - self.bc) / 10.0
+            self.bc += (self.goal_bc - self.bc) / 5.0
         
         # 丸める
         self.bc = round(self.bc, 2)
