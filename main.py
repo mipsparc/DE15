@@ -18,7 +18,7 @@ import os
 
 # デバイスファイル(udevファイルを読み込ませていればこのまま)
 hid_port = '/dev/de15_hid'
-dsair2_port = '/dev/dsair2'
+dsair2_port = '/dev/ttyUSB0'
 
 # 標準エラー出力をログファイルにする
 os.makedirs('log', exist_ok=True)
@@ -37,8 +37,8 @@ if 'hid' in test_params:
 if 'brake' in test_params:
     BRAKE_STATUS_TEST_VALUE = BrakeStatues.RUN
     BRAKE_LEVEL_TEST_VALUE = 0
-if 'mascon' in test_params:
-    MASCON_TEST_VALUE = 7
+#if 'mascon' in test_params:
+MASCON_TEST_VALUE = 7
 
 # HID読み書きプロセス起動、共有メモリ作成
 brake_status_shared = Value('i', int(BrakeStatues.FIX))
@@ -109,7 +109,10 @@ while True:
         
         # DSAir2に速度と方向を渡す
         if CONTROLLER_CONNECTED:
-            calcDE15SpeedOut(speed)
+            if speed <= 0:
+                speed_out = 0
+            else:
+                speed_out = speed * 20
             dsair2.move(speed_out, DE101.getWay())
             last_move = speed == 0
 

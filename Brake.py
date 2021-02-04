@@ -28,28 +28,30 @@ class BrakeStatues(IntEnum):
     
     @classmethod
     def statusIdToName(self, status_id):
-        return self.getNames(status_id)
+        return self.getNames()[status_id]
 
 class DE15Brake:
     @staticmethod
     def valueToStatus(brake_value):
+        lower_brake_value = 14660
         if brake_value == False:
             return BrakeStatues.ERROR_SENSOR
-        # 以下のパラメータを修正したら、formatValueのbrake_level導出箇所も修正する
-        elif brake_value < 5500:
+        elif brake_value < 14000:
             return BrakeStatues.ERROR
         # 階ユルメ
-        elif brake_value < 5760:
+        elif brake_value < 14170:
             return BrakeStatues.EMER
-        elif brake_value < 5800:
+        elif brake_value < 14240:
             return BrakeStatues.FIX
-        elif brake_value < 5830:
+        # 以下のパラメータを修正したら、formatValueのbrake_level導出箇所も修正する
+        elif brake_value < 14285:
             return BrakeStatues.MAX_BRAKE
-        elif brake_value < 6070:
+        # 以下のパラメータを修正したら、formatValueのbrake_level導出箇所も修正する
+        elif brake_value < 14533:
             return BrakeStatues.BRAKE
-        elif brake_value < 6130:
+        elif brake_value < 14570:
             return BrakeStatues.RUN
-        elif brake_value < 6230:
+        elif brake_value < 14660:
             return BrakeStatues.LOWER_BRAKE
 
         return BrakeStatues.ERROR
@@ -61,7 +63,7 @@ class DE15Brake:
     @classmethod
     def formatValue(self, value):
         status = self.valueToStatus(value)
-        
+                
         # 異常時には状態表示をする
         if status in (BrakeStatues.ERROR, BrakeStatues.ERROR_SENSOR):
             print(BrakeStatues.statusIdToName(status))
@@ -70,6 +72,6 @@ class DE15Brake:
 
         brake_level = 0
         if status == BrakeStatues.BRAKE:
-            brake_level = self.getBrakeLevel(value, 5830, 6070)
+            brake_level = self.getBrakeLevel(value, 14285, 14533)
             
         return {'status': status.value, 'level': brake_level}
