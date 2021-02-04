@@ -4,7 +4,7 @@
 # はじめにREADME.mdを読むこと
 
 import DE10
-import MasconReader
+from Mascon import Mascon
 import Brake
 from Brake import BrakeStatues
 import HID

@@ -33,7 +33,7 @@ class HID:
         self.ser.write(f'speed:{speed_out}'.encode('ascii'))
 
 # シリアル通信プロセスのワーカー
-def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, device):
+def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, device):
     hid = HID(device)
     while True:
         serial = hid.readSerial()
@@ -42,6 +42,8 @@ def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, device):
         data_type, value = serial
         if data_type == 'brake':
             syncBrake(value, brake_status_shared, brake_level_shared)
+        if data_type == 'mascon':
+            syncMascon(value, mascon_shared)
         hid.send(speedmeter_shared.value)
         
 def syncBrake(brake_value, brake_status_shared, brake_level_shared):
@@ -51,6 +53,14 @@ def syncBrake(brake_value, brake_status_shared, brake_level_shared):
         return
     brake_status_shared.value = brake_result['status']
     brake_level_shared.value = brake_result['level']
+    
+def syncMascon(mascon_value, mascon_shared):
+    mascon_value = int(mascon_value)
+    
+    # 不正値の読み飛ばし(0-14)
+    if not mascon_value in range(15):
+        return
+    masconshared.value = mascon_shared
     
 if __name__ == '__main__':
     hid = HID('/dev/ttyACM0')
