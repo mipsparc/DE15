@@ -16,10 +16,9 @@ import time
 import sys
 import os
 
-# 各装置のデバイスファイル(udevファイルを読み込ませていればこのまま)
-hid_port = '/dev/ttyACM0'
-# DSair2のシリアルポート。Linuxでほかに機器がなければこのまま
-dsair2_port = '/dev/ttyUSB0'
+# デバイスファイル(udevファイルを読み込ませていればこのまま)
+hid_port = '/dev/de15_hid'
+dsair2_port = '/dev/dsair2'
 
 # 標準エラー出力をログファイルにする
 os.makedirs('log', exist_ok=True)
@@ -29,16 +28,17 @@ sys.stderr = open('log/' + str(int(time.time())) + '.txt', 'w')
 # ex) python3 main.py controller hid
 CONTROLLER_CONNECTED = True
 HID_CONNECTED = True
+MASCON_CONNECTED = True
 test_params = sys.argv[1:]
 if 'controller' in test_params:
     CONTROLLER_CONNECTED = False
 if 'hid' in test_params:
     HID_CONNECTED = False
+if 'brake' in test_params:
     BRAKE_STATUS_TEST_VALUE = BrakeStatues.RUN
     BRAKE_LEVEL_TEST_VALUE = 0
-    
-# TODO: hidの中に入れる
-MASCON_TEST_VALUE = 7
+if 'mascon' in test_params:
+    MASCON_TEST_VALUE = 7
 
 # HID読み書きプロセス起動、共有メモリ作成
 brake_status_shared = Value('i', int(BrakeStatues.FIX))

@@ -63,7 +63,7 @@ def syncMascon(mascon_value, mascon_shared):
     masconshared.value = mascon_shared
     
 if __name__ == '__main__':
-    hid = HID('/dev/ttyACM0')
+    hid = HID('/dev/de15_hid')
     while True:
         print(hid.readSerial())
     
