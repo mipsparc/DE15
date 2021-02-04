@@ -15,36 +15,35 @@ class HID:
         
     # intで出力する
     def readSerial(self):
+        raw_value = self.ser.readline()
+        self.ser.reset_input_buffer()
+        raw_text = raw_value.decode('ascii')
+        raw_text = raw_text.replace('\r\n', '')
         try:
-            raw_value = self.ser.readline()
-            self.ser.reset_input_buffer()
-            raw_value = raw_value.decode('ascii')
-            raw_value = raw_value.replace('\r\n', '')
-            return {
-                'brake': int(float(raw_value))
-            }
-        except KeyboardInterrupt:
-            exit()
-        except:
+            data_type, value = raw_text.split(':')
+            return [data_type, value]
+        except ValueError:
             return False
         
     def send(self, speed):
+        speed_out = speed * 2
         # 速度計接続を実装するまでpass
-        pass
+        self.ser.write(f'speed:{speed_out}'.encode('ascii'))
 
 # シリアル通信プロセスのワーカー
 def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, device):
     hid = HID(device)
     while True:
-        try:
-            brake_value = hid.readSerial()['brake']
-            syncBrake(brake_value, brake_status_shared, brake_level_shared)
-            hid.send(speedmeter_shared.value)
-        except serial.serialutil.SerialException:
-            raise
+        serial = hid.readSerial()
+        if serial == False:
+            continue
+        data_type, value = serial
+        if data_type == 'brake':
+            syncBrake(value, brake_status_shared, brake_level_shared)
+        hid.send(speedmeter_shared.value)
         
 def syncBrake(brake_value, brake_status_shared, brake_level_shared):
-    brake_result = DE15Brake.formatValue(brake_value)
+    brake_result = DE15Brake.formatValue(int(brake_value))
     # 不正値の読み飛ばし
     if brake_result == False:
         return
