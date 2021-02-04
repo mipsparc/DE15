@@ -4,6 +4,7 @@ import serial
 import sys
 from Brake import DE15Brake
 
+# ブレーキ装置、速度計、圧力計などのシリアルI/Oを一括管理する
 class HID:
     def __init__(self, device):
         # timeoutを設定することで通信エラーを防止する
@@ -26,6 +27,7 @@ class HID:
             return False
         
     def send(self, speed):
+        # 適当な係数
         speed_out = speed * 2
         # 速度計への出力
         self.ser.write(f'speed:{speed_out}'.encode('ascii'))
