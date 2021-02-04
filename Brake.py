@@ -1,6 +1,5 @@
 #coding:utf-8
 
-import serial
 from enum import IntEnum
 import sys
 
