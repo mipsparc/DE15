@@ -35,13 +35,23 @@ class HID:
 # シリアル通信プロセスのワーカー
 def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, device):
     hid = HID(device)
+    
+    # 10回読み込んでからブレーキを初期化する
+    init_brake_ref_count = 10
     while True:
         serial = hid.readSerial()
         if serial == False:
             continue
         data_type, value = serial
         if data_type == 'brake':
-            syncBrake(value, brake_status_shared, brake_level_shared)
+            # 最初10回は読み飛ばした上で、初期位置を決定する
+            if init_brake_ref_count > 1:
+                init_brake_ref_count -= 1
+            elif init_brake_ref_count == 1:
+                DE15Brake.setRefValue(value)
+                init_brake_ref_count = 0
+            else:
+                syncBrake(value, brake_status_shared, brake_level_shared)
         if data_type == 'mascon':
             syncMascon(value, mascon_shared)
         hid.send(speedmeter_shared.value)

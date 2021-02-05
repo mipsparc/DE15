@@ -18,7 +18,7 @@ import os
 
 # デバイスファイル(udevファイルを読み込ませていればこのまま)
 hid_port = '/dev/de15_hid'
-dsair2_port = '/dev/ttyUSB0'
+dsair2_port = '/dev/dsair2'
 
 # 標準エラー出力をログファイルにする
 os.makedirs('log', exist_ok=True)
@@ -37,8 +37,8 @@ if 'hid' in test_params:
 if 'brake' in test_params:
     BRAKE_STATUS_TEST_VALUE = BrakeStatues.RUN
     BRAKE_LEVEL_TEST_VALUE = 0
-#if 'mascon' in test_params:
-MASCON_TEST_VALUE = 7
+if 'mascon' in test_params:
+    MASCON_TEST_VALUE = 7
 
 # HID読み書きプロセス起動、共有メモリ作成
 brake_status_shared = Value('i', int(BrakeStatues.FIX))
@@ -55,6 +55,7 @@ if HID_CONNECTED:
     hid_process.start()
     # ブレーキ圧力計オブジェクト
     #meter = Meter.Meter(meter_port)
+    time.sleep(0.5)
 else:
     brake_status = BRAKE_STATUS_TEST_VALUE
     brake_level = BRAKE_LEVEL_TEST_VALUE
