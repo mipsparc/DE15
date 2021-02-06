@@ -46,16 +46,17 @@ brake_level_shared = Value('f', 0.0)
 speedmeter_shared = Value('i', 0)
 mascon_shared = Value('i', 0)
 
+# マスコンが来るまで
 mascon_shared.value = MASCON_TEST_VALUE
 
 if HID_CONNECTED:
+    input('ブレーキハンドル(自弁)を全ブレーキと固定の中間にして、Enterを押してください')
     hid_process = Process(target=HID.Worker, args=(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, hid_port))
     # 親プロセスが死んだら自動的に終了
     hid_process.daemon = True
     hid_process.start()
     # ブレーキ圧力計オブジェクト
     #meter = Meter.Meter(meter_port)
-    time.sleep(0.5)
 else:
     brake_status = BRAKE_STATUS_TEST_VALUE
     brake_level = BRAKE_LEVEL_TEST_VALUE

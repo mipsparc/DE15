@@ -3,6 +3,7 @@
 import serial
 import sys
 from Brake import DE15Brake
+from Mascon import Mascon
 
 # ブレーキ装置、速度計、圧力計などのシリアルI/Oを一括管理する
 class HID:
@@ -65,12 +66,12 @@ def syncBrake(brake_value, brake_status_shared, brake_level_shared):
     brake_level_shared.value = brake_result['level']
     
 def syncMascon(mascon_value, mascon_shared):
-    mascon_value = int(mascon_value)
+    mascon_level = Mascon.formatValue(mascon_value)
     
     # 不正値の読み飛ばし(0-14)
-    if not mascon_value in range(15):
+    if not mascon_level in range(15):
         return
-    masconshared.value = mascon_shared
+    mascon_shared.value = mascon_shared
     
 if __name__ == '__main__':
     hid = HID('/dev/de15_hid')

@@ -11,16 +11,26 @@ void setup() {
     Wire.beginTransmission(MCP3425_address);
     Wire.write(configRegister);
     Wire.endTransmission();
+    pinMode(2, INPUT);
+    pinMode(3, INPUT);
+    pinMode(4, INPUT);
+    pinMode(5, INPUT);
+    pinMode(6, INPUT);
+    pinMode(7, INPUT);
 }
  
 void loop() {
     char brake_text[20];
+    char mascon_text[20];
     String input;
     char pos;
+    unsigned int mascon_value;
     
     int brake_value = readADC();
     snprintf(brake_text, 20, "brake:%d", brake_value);
     Serial.println(brake_text);
+    snprintf(mascon_text, 20, "mascon:%d%d%d%d%d%d%d%d", digitalRead(2), digitalRead(3), digitalRead(4), digitalRead(5), digitalRead(6), digitalRead(7), digitalRead(8), digitalRead(9));
+    Serial.println(mascon_text);
 
     // speed:123 の形式で送ると速度計にアナログ出力する
     input = Serial.readStringUntil('\n');
