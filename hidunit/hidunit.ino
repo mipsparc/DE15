@@ -6,7 +6,9 @@
 #define speedOutPin 10 // D10ポート
 
 Servo myServo;
-int last_angle = 0;
+int last_target_angle = 0;
+int target_angle = 0;
+int angle = 0;
 
 void setup() {
     Wire.begin();
@@ -52,8 +54,10 @@ void loop() {
       analogWrite(speedOutPin, input_value);
     }
     if (input_type == String("pressure")) {
-      moveServo(input_value);
+      target_angle = input_value;
     }
+
+    moveServo();
 }
  
 int readADC() {
@@ -61,11 +65,16 @@ int readADC() {
     return ( (Wire.read() << 8 ) + Wire.read() );
 }
 
-void moveServo(int angle) {
-      if (angle == last_angle) {
+void moveServo() {
+      if (target_angle == last_target_angle) {
         return;
       }
-      last_angle = angle;
+      last_target_angle = target_angle;
+      if (angle == target_angle) {
+        return;
+      }
+
+      angle += (target_angle - angle) / 5;
 
       myServo.writeMicroseconds(angle);
 }
