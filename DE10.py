@@ -123,5 +123,8 @@ class DE10:
     # ブレーキ管圧力は通常490kPa 140kPa減圧して350kPaになると最大がかかる
     def getBp(self):
         return 490 - (self.bc / self.BC_MAX) * 140
+
+    def getBc(self):
+        return self.bc
     
 

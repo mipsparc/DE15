@@ -1,12 +1,16 @@
+#include <Servo.h>
 #include <Wire.h>
 #include <stdio.h>
 #define MCP3425_address 0x68
 #define configRegister 0b10011000 //16bit 15sps PGA x1
 #define speedOutPin 10 // D10ポート
 
+Servo myServo;
+int last_angle = 0;
+
 void setup() {
     Wire.begin();
-    Serial.setTimeout(100);
+    Serial.setTimeout(30);
     Serial.begin(9600);
     Wire.beginTransmission(MCP3425_address);
     Wire.write(configRegister);
@@ -17,6 +21,7 @@ void setup() {
     pinMode(5, INPUT);
     pinMode(6, INPUT);
     pinMode(7, INPUT);
+    myServo.attach(A0);
 }
  
 void loop() {
@@ -32,7 +37,7 @@ void loop() {
     snprintf(mascon_text, 20, "mascon:%d%d%d%d%d%d%d%d", digitalRead(2), digitalRead(3), digitalRead(4), digitalRead(5), digitalRead(6), digitalRead(7), digitalRead(8), digitalRead(9));
     Serial.println(mascon_text);
 
-    // speed:123 の形式で送ると速度計にアナログ出力する
+    // speed:123 の形式で送る
     input = Serial.readStringUntil('\n');
     pos = input.indexOf(":");
     if (pos == -1) {
@@ -41,12 +46,26 @@ void loop() {
     String input_type = input.substring(0, pos);
     String input_value_str = input.substring(pos+1);
     int input_value = input_value_str.toInt();
+
+    // 速度計にアナログ出力する
     if (input_type == String("speed")) {
       analogWrite(speedOutPin, input_value);
+    }
+    if (input_type == String("pressure")) {
+      moveServo(input_value);
     }
 }
  
 int readADC() {
     Wire.requestFrom(MCP3425_address, 2);
     return ( (Wire.read() << 8 ) + Wire.read() );
+}
+
+void moveServo(int angle) {
+      if (angle == last_angle) {
+        return;
+      }
+      last_angle = angle;
+
+      myServo.writeMicroseconds(angle);
 }

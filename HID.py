@@ -27,14 +27,16 @@ class HID:
         except ValueError:
             return False
         
-    def send(self, speed):
+    def send(self, speed, pressure):
         # 適当な係数
         speed_out = speed * 2
+        pressure_out = pressure
         # 速度計への出力
         self.ser.write(f'speed:{speed_out}'.encode('ascii'))
+        self.ser.write(f'pressure:{pressure_out}'.encode('ascii'))
 
 # シリアル通信プロセスのワーカー
-def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, device):
+def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, pressure_shared, device):
     hid = HID(device)
     
     # 10回読み込んでからブレーキを初期化する
@@ -55,7 +57,7 @@ def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_sh
                 syncBrake(value, brake_status_shared, brake_level_shared)
         if data_type == 'mascon':
             syncMascon(value, mascon_shared)
-        hid.send(speedmeter_shared.value)
+        hid.send(speedmeter_shared.value, pressure_shared.value)
         
 def syncBrake(brake_value, brake_status_shared, brake_level_shared):
     brake_result = DE15Brake.formatValue(int(brake_value))

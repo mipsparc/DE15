@@ -10,7 +10,6 @@ from Brake import BrakeStatues
 import HID
 import DSair2_v1
 import SoundManager
-import Meter
 from multiprocessing import Process, Value
 import time
 import sys
@@ -29,6 +28,7 @@ brake_status_shared = Value('i', int(BrakeStatues.FIX))
 brake_level_shared = Value('f', 0.0)
 speedmeter_shared = Value('i', 0)
 mascon_shared = Value('i', 0)
+pressure_shared = Value('i', 0)
 
 # 引数として接続されていないものを渡す
 # ex) python3 main.py controller hid
@@ -53,12 +53,10 @@ if 'mascon' in test_params:
 
 # HID読み書きプロセス起動
 if HID_CONNECTED:
-    hid_process = Process(target=HID.Worker, args=(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, hid_port))
+    hid_process = Process(target=HID.Worker, args=(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, pressure_shared, hid_port))
     # 親プロセスが死んだら自動的に終了
     hid_process.daemon = True
     hid_process.start()
-    # ブレーキ圧力計オブジェクト
-    #meter = Meter.Meter(meter_port)
 
 # DE10のモデルオブジェクト
 DE101 = DE10.DE10()
@@ -99,6 +97,7 @@ while True:
         kph = speed * 3600 / 1000
         # 速度計に現在車速を与える
         speedmeter_shared.value = int(kph)
+        pressure_shared.value = int(DE101.getBc())
         
         print('{}km/h  BC: {}'.format(int(kph), int(490 - DE101.getBp())))
 
