@@ -4,6 +4,7 @@ import serial
 import sys
 from Brake import DE15Brake
 from Mascon import Mascon
+from Smooth import Pressure, SpeedMeter
 
 # ブレーキ装置、速度計、圧力計などのシリアルI/Oを一括管理する
 class HID:
@@ -19,7 +20,11 @@ class HID:
     def readSerial(self):
         raw_value = self.ser.readline()
         self.ser.reset_input_buffer()
-        raw_text = raw_value.decode('ascii')
+        try:
+            raw_text = raw_value.decode('ascii')
+        except UnicodeDecodeError:
+            print('異常データ')
+            return False
         raw_text = raw_text.replace('\r\n', '')
         try:
             data_type, value = raw_text.split(':')
@@ -28,11 +33,11 @@ class HID:
             return False
         
     def send(self, speed, pressure):
-        # 適当な係数
-        speed_out = speed * 2
-        pressure_out = pressure
+        speed_out = SpeedMeter.getValue(speed)
+        pressure_out = Pressure.getValue(pressure)
         # 速度計への出力
         self.ser.write(f'speed:{speed_out}'.encode('ascii'))
+        # 圧力計への出力
         self.ser.write(f'pressure:{pressure_out}'.encode('ascii'))
 
 # シリアル通信プロセスのワーカー
@@ -79,31 +84,3 @@ if __name__ == '__main__':
     hid = HID('/dev/de15_hid')
     while True:
         print(hid.readSerial())
-    
-    '''
-    #
-    # 速度計を動かすようになったら有効化する
-    #
-    # 速度計の針を動かす
-    def setSpeedMeter(speed):
-        if speed == 0:
-            speed = 1
-        if speed / 10 >= 9:
-            speed = 89
-            
-        lower_speed = self.speed_table[speed // 10]
-        higher_speed = self.speed_table[(speed // 10) + 1]
-        output = lower_speed + int((lower_speed + higher_speed) / (speed * 2) * (speed % 10))
-        
-        output += random.randrange(-5, 5)
-        
-        if output < 0:
-            output = 0
-        if output > 255:
-            output = 255
-        self.sendSpeed(output)
-        
-    # 速度情報送信をする
-    def sendSpeed(self, output):
-        self.ser.write(bytes([output]))
-    '''

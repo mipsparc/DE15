@@ -12,7 +12,7 @@ int angle = 0;
 
 void setup() {
     Wire.begin();
-    Serial.setTimeout(30);
+    Serial.setTimeout(50);
     Serial.begin(9600);
     Wire.beginTransmission(MCP3425_address);
     Wire.write(configRegister);
