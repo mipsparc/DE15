@@ -24,10 +24,17 @@ dsair2_port = '/dev/dsair2'
 os.makedirs('log', exist_ok=True)
 sys.stderr = open('log/' + str(int(time.time())) + '.txt', 'w')
 
+# 共有メモリ作成
+brake_status_shared = Value('i', int(BrakeStatues.FIX))
+brake_level_shared = Value('f', 0.0)
+speedmeter_shared = Value('i', 0)
+mascon_shared = Value('i', 0)
+
 # 引数として接続されていないものを渡す
 # ex) python3 main.py controller hid
 CONTROLLER_CONNECTED = True
 HID_CONNECTED = True
+BRAKE_CONNECTED = True
 MASCON_CONNECTED = True
 test_params = sys.argv[1:]
 if 'controller' in test_params:
@@ -35,32 +42,23 @@ if 'controller' in test_params:
 if 'hid' in test_params:
     HID_CONNECTED = False
 if 'brake' in test_params:
-    BRAKE_STATUS_TEST_VALUE = BrakeStatues.RUN
-    BRAKE_LEVEL_TEST_VALUE = 0
-if 'mascon' in test_params:
-    MASCON_TEST_VALUE = 7
-
-# HID読み書きプロセス起動、共有メモリ作成
-brake_status_shared = Value('i', int(BrakeStatues.FIX))
-brake_level_shared = Value('f', 0.0)
-speedmeter_shared = Value('i', 0)
-mascon_shared = Value('i', 0)
-
-# マスコンが来るまで
-mascon_shared.value = MASCON_TEST_VALUE
-
-if HID_CONNECTED:
+    BRAKE_CONNECTED = False
+    brake_status = BrakeStatues.RUN
+    brake_level = 0
+else:
     input('ブレーキハンドル(自弁)を全ブレーキと固定の中間にして、Enterを押してください')
+if 'mascon' in test_params:
+    MASCON_CONNECTED = False
+    mascon_level = 7
+
+# HID読み書きプロセス起動
+if HID_CONNECTED:
     hid_process = Process(target=HID.Worker, args=(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, hid_port))
     # 親プロセスが死んだら自動的に終了
     hid_process.daemon = True
     hid_process.start()
     # ブレーキ圧力計オブジェクト
     #meter = Meter.Meter(meter_port)
-else:
-    brake_status = BRAKE_STATUS_TEST_VALUE
-    brake_level = BRAKE_LEVEL_TEST_VALUE
-    mascon_level = MASCON_TEST_VALUE
 
 # DE10のモデルオブジェクト
 DE101 = DE10.DE10()
@@ -81,9 +79,11 @@ last_counter = time.time()
 while True:
     try:
         # ハードウェアからの入力を共有メモリから取り出す
-        mascon_level = mascon_shared.value
-        brake_status = brake_status_shared.value
-        brake_level = brake_level_shared.value
+        if MASCON_CONNECTED:
+            mascon_level = mascon_shared.value
+        if BRAKE_CONNECTED:
+            brake_status = brake_status_shared.value
+            brake_level = brake_level_shared.value
             
         if HID_CONNECTED and not hid_process.is_alive():
             print('HIDプロセスが停止しています')

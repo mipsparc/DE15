@@ -70,8 +70,6 @@ class DE15Brake:
                 
         # 異常時には状態表示をする
         if status in (BrakeStatues.ERROR, BrakeStatues.ERROR_SENSOR):
-            print(BrakeStatues.statusIdToName(status))
-            print(value)
             return False
 
         brake_level = 0

@@ -71,7 +71,7 @@ def syncMascon(mascon_value, mascon_shared):
     # 不正値の読み飛ばし(0-14)
     if not mascon_level in range(15):
         return
-    mascon_shared.value = mascon_shared
+    mascon_shared.value = mascon_level
     
 if __name__ == '__main__':
     hid = HID('/dev/de15_hid')
