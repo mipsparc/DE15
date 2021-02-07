@@ -5,40 +5,48 @@ import sys
 from Brake import DE15Brake
 from Mascon import Mascon
 from Smooth import Pressure, SpeedMeter
+import time
 
 # ブレーキ装置、速度計、圧力計などのシリアルI/Oを一括管理する
 class HID:
     def __init__(self, device):
+        # 送信輪番
+        self.send_rotation = 0
         # timeoutを設定することで通信エラーを防止する
         try:
-            self.ser = serial.Serial(device, timeout=0.3, write_timeout=0.3, inter_byte_timeout=0.3, baudrate=9600)
+            self.ser = serial.Serial(device, timeout=0.1, write_timeout=0.1, inter_byte_timeout=0.1, baudrate=9600)
         except serial.serialutil.SerialException:
             print('正常にシリアルポートを開けませんでした。')
             raise
         
-    # intで出力する
     def readSerial(self):
         raw_value = self.ser.readline()
-        self.ser.reset_input_buffer()
         try:
             raw_text = raw_value.decode('ascii')
         except UnicodeDecodeError:
             print('異常データ')
             return False
+        
         raw_text = raw_text.replace('\r\n', '')
+        
         try:
             data_type, value = raw_text.split(':')
             return [data_type, value]
         except ValueError:
             return False
         
-    def send(self, speed, pressure):
-        speed_out = SpeedMeter.getValue(speed)
-        pressure_out = Pressure.getValue(pressure)
-        # 速度計への出力
-        self.ser.write(f'speed:{speed_out}'.encode('ascii'))
-        # 圧力計への出力
-        self.ser.write(f'pressure:{pressure_out}'.encode('ascii'))
+    def send(self, speed, pressure):        
+        # 輪番で送出していく
+        if self.send_rotation == 0:
+            # 速度計への出力
+            speed_out = SpeedMeter.getValue(speed)
+            self.ser.write(f'speed:{speed_out}\n'.encode('ascii'))
+            self.send_rotation = 1
+        elif self.send_rotation == 1:
+            # 圧力計への出力
+            pressure_out = Pressure.getValue(pressure)
+            self.ser.write(f'pressure:{pressure_out}\n'.encode('ascii'))
+            self.send_rotation = 0
 
 # シリアル通信プロセスのワーカー
 def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, pressure_shared, device):
@@ -48,8 +56,8 @@ def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_sh
     init_brake_ref_count = 10
     while True:
         serial = hid.readSerial()
-        if serial == False:
-            continue
+        
+        # 受信段
         data_type, value = serial
         if data_type == 'brake':
             # 最初10回は読み飛ばした上で、初期位置を決定する
@@ -62,6 +70,8 @@ def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_sh
                 syncBrake(value, brake_status_shared, brake_level_shared)
         if data_type == 'mascon':
             syncMascon(value, mascon_shared)
+    
+        # 送信段
         hid.send(speedmeter_shared.value, pressure_shared.value)
         
 def syncBrake(brake_value, brake_status_shared, brake_level_shared):
@@ -84,3 +94,4 @@ if __name__ == '__main__':
     hid = HID('/dev/de15_hid')
     while True:
         print(hid.readSerial())
+        hid.send(0, 180)
