@@ -34,15 +34,15 @@ class DE10:
     # 0.1秒進める
     def advanceTime(self):
         # 加速度を求める(m/s2)
-        if self.speed < 3.33:
+        if self.speed < 3.33: # 12kph
             accel = self.getSmoothLevel() * 0.803
-        elif self.speed < 6.94:
+        elif self.speed < 6.94: # 25kph
             accel = self.getSmoothLevel() * 0.5
-        elif self.speed < 9.72:
+        elif self.speed < 9.72: # 35kph
             accel = self.getSmoothLevel() * 0.333
-        elif self.speed < 12.5:
+        elif self.speed < 12.5: # 45kph
             accel = self.getSmoothLevel() * 0.222
-        elif self.speed < 23.5:
+        elif self.speed < 23.5: # 84.6kph
             accel = self.getSmoothLevel() * 0.194
         # 最高速度では加速は0になる
         else:
