@@ -113,7 +113,7 @@ while True:
             if speed <= 0:
                 speed_out = 0
             else:
-                speed_out = speed * 20
+                speed_out = speed * 30
             dsair2.move(speed_out, DE101.getWay())
             last_move = speed == 0
 

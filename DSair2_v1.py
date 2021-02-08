@@ -66,10 +66,9 @@ class DSair2:
 
     def send(self, value):
         self.ser.reset_input_buffer()
-        print(value)
         self.ser.write(value.encode('ascii') + b'\n')
         self.ser.flush()
-        print(self.ser.read(8))
+        self.ser.read(8)
         
     def move(self, speed_level, way):
         if self.is_dcc:
