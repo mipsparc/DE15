@@ -20,14 +20,12 @@ class SoundManager:
         self.last_run = False
         
         # 頻繁に鳴る音はボリュームを合わせて1.0を超えないようにする
-        self.run_max_volume = 0.2
-        self.s.power.volume(0.1)
+        self.run_max_volume = 0.3
+        self.s.power.volume(0.3)
         self.s.joint.volume(0.8)
         self.s.switch.volume(0.2)
-        self.s.idle.volume(0.07)
         self.s.brake.volume(0.5)
         self.s.brake_fadeout.volume(0.5)
-        self.s.idle.play()
 
     def brake(self, bc):
         if (not self.last_brake) and bc != self.last_bc:
@@ -69,6 +67,7 @@ class SoundManager:
                     self.s.joint.play()
                 if self.joint_count >= wheel_count:
                     self.joint_count = 0
+
     def run(self, speed):
         if not self.last_run and speed > 0.1:
             self.s.run.play()
@@ -77,7 +76,7 @@ class SoundManager:
             self.s.run.stop()
             self.last_run = False
             return
-        
+
         self.s.run.volume(min(speed / 15 * self.run_max_volume, self.run_max_volume))
 
     def switch(self, way):
@@ -86,21 +85,15 @@ class SoundManager:
             self.s.switch.play()
             
     def power(self, mascon_level):        
-        if mascon_level in (1, 2):
+        if mascon_level in (0, 1):
             num = 0
-        elif mascon_level in (3, 4):
-            num = 1
-        elif mascon_level in (5, 6):
-            num = 2
-        elif mascon_level in (7, 8):
-            num = 3
+        elif mascon_level >= 11:
+            num = 10
         else:
-            num = 4
+            num = mascon_level - 1
 
         if num != self.power_num:
             self.s.power.stop()
             self.power_num = num
-            if mascon_level == 0:
-                return
             self.s.power.play(num)
         
