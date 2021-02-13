@@ -58,7 +58,7 @@ def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_sh
         serial = hid.readSerial()
         
         # 受信段
-        if serial != false:
+        if serial != False:
             data_type, value = serial
             if data_type == 'brake':
                 # 最初10回は読み飛ばした上で、初期位置を決定する
