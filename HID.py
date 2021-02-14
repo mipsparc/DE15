@@ -49,7 +49,7 @@ class HID:
             self.send_rotation = 0
 
 # シリアル通信プロセスのワーカー
-def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, pressure_shared, device):
+def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, pressure_shared, way_shared, device):
     hid = HID(device)
     
     # 10回読み込んでからブレーキを初期化する
@@ -70,7 +70,7 @@ def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_sh
                 else:
                     syncBrake(value, brake_status_shared, brake_level_shared)
             if data_type == 'mascon':
-                syncMascon(value, mascon_shared)
+                syncMascon(value, mascon_shared, way_shared)
     
         # 送信段
         hid.send(speedmeter_shared.value, pressure_shared.value)
@@ -82,10 +82,23 @@ def syncBrake(brake_value, brake_status_shared, brake_level_shared):
         return
     brake_status_shared.value = brake_result['status']
     brake_level_shared.value = brake_result['level']
-    
-def syncMascon(mascon_value, mascon_shared):
+
+start_pressing_waysw = False
+def syncMascon(mascon_value, mascon_shared, way_shared):
+    global start_pressing_waysw
     mascon_level = Mascon.formatValue(mascon_value)
-    
+    # 方向転換スイッチ押下
+    if mascon_level == 99:
+        if start_pressing_waysw == False:
+            start_pressing_waysw = time.time()
+        else:
+            if time.time() > (start_pressing_waysw + 1):
+                if way_shared.value == 1:
+                    way_shared.value = 2
+                else:
+                    way_shared.value = 1
+                start_pressing_waysw = False
+        return
     # 不正値の読み飛ばし(0-14)
     if not mascon_level in range(15):
         return

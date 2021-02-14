@@ -29,6 +29,7 @@ brake_level_shared = Value('f', 0.0)
 speedmeter_shared = Value('i', 0)
 mascon_shared = Value('i', 0)
 pressure_shared = Value('i', 0)
+way_shared = Value('i', 0)
 
 # 引数として接続されていないものを渡す
 # ex) python3 main.py controller hid
@@ -53,7 +54,7 @@ if 'mascon' in test_params:
 
 # HID読み書きプロセス起動
 if HID_CONNECTED:
-    hid_process = Process(target=HID.Worker, args=(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, pressure_shared, hid_port))
+    hid_process = Process(target=HID.Worker, args=(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, pressure_shared, way_shared, hid_port))
     # 親プロセスが死んだら自動的に終了
     hid_process.daemon = True
     hid_process.start()
@@ -78,6 +79,8 @@ while True:
     try:
         # ハードウェアからの入力を共有メモリから取り出す
         if MASCON_CONNECTED:
+            # TODO: 現在はマスコンにレバーサがついているため
+            way = way_shared.value
             mascon_level = mascon_shared.value
         if BRAKE_CONNECTED:
             brake_status = brake_status_shared.value
@@ -88,6 +91,7 @@ while True:
             raise SystemError
         
         # DE10モデルオブジェクトに入力を与える
+        DE101.setWay(way)
         DE101.setMascon(mascon_level)
         DE101.setBrakeStatus(brake_status)
         DE101.setBrake(brake_level)

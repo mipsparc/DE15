@@ -23,9 +23,11 @@ class DE10:
         # 非常ブレーキ状態
         self.eb = False
         # 客貨車牽引時の加速度減少(単機: 1)
-        self.freight = 0.8
+        self.freight = 0.7
         # 目標ブレーキシリンダ圧力
         self.goal_bc = self.BC_MAX
+        # 方向 0は切
+        self.way = 0
         
     def getSmoothLevel(self):
         # y = log2(x+1) 最大が1
@@ -100,9 +102,11 @@ class DE10:
     def getSpeed(self):
         return self.speed
     
-    # 暫定で方向固定
+    def setWay(self, way):
+        self.way = way
+    
     def getWay(self):
-        return 1
+        return self.way
     
     # 0 ~ 14のマスコンノッチを入力 EB時は力行不可
     def setMascon(self, mascon_level):

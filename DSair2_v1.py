@@ -24,7 +24,7 @@ class DSair2:
 
         self.ser.reset_input_buffer()
         self.send('setPing()')
-        time.sleep(0.5)
+        time.sleep(1)
         init_response = self.ser.read(200)
         print(init_response)
         if (not init_response.decode('ascii').endswith('200 Ok\r\n')

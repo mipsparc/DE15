@@ -2,10 +2,13 @@
 
 class Mascon:
     @classmethod
+    def isTest(self):
+        return True
+        
+    @classmethod
     def formatValue(self, mascon_value):
         # 試験用マスコンの場合
-        TEST = True
-        if TEST:
+        if self.isTest():
             if mascon_value[7:8] == '1':
                 return 1
             elif mascon_value[6:7] == '1':
@@ -16,6 +19,9 @@ class Mascon:
                 return 12
             elif mascon_value[3:4] == '1':
                 return 14
+            # 方向転換スイッチ押下
+            elif mascon_value[2:3] == '1':
+                return 99
             else:
                 return 0
         else:
