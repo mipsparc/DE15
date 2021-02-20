@@ -8,7 +8,24 @@ class Smooth:
                 # 1次関数を求める
                 tilt = (p[1] - self.PROFILE[i-1][1]) / (p[0] - self.PROFILE[i-1][0])
                 b = p[1] - tilt * p[0]
-                return int(tilt * value + b)
+                output = int(tilt * value + b)
+                return output
+
+class Speed(Smooth):
+    # kph, DSAir指令値のプロファイル
+    PROFILE = [
+        [0.0, 0],
+        [5.0, 30],
+        [15.0, 70],
+        [20.0, 100],
+        [30.0, 300],
+        [40.0, 400],
+        [50.0, 500],
+        [60.0, 600],
+        [90.0, 900],
+        [180.0, 950],
+        [999.9, None], #dummy
+    ]
 
 class Pressure(Smooth):
     # BC, サーボusのプロファイル

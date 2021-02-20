@@ -63,12 +63,6 @@ class DSair2:
         
         self.last_out_speed = 0
         self.last_way = -1
-
-    def send(self, value):
-        self.ser.reset_input_buffer()
-        self.ser.write(value.encode('ascii') + b'\n')
-        self.ser.flush()
-        #self.ser.read(8)
         
     def move(self, speed_level, way):
         if self.is_dcc:
@@ -133,4 +127,15 @@ class DSair2:
         if out_speed != self.last_out_speed:
             self.last_out_speed = out_speed
             self.send(f'DC({out_speed},{way})\n')
+    
+    # 最終的にコマンドを送信する関数
+    def send(self, value):
+        self.ser.reset_input_buffer()
+        self.ser.write(value.encode('ascii') + b'\n')
+        self.ser.flush()
 
+if __name__ == '__main__':
+    dsair2 = DSair2('/dev/dsair2', True, 3)
+    while True:
+        level = int(input('level> '))
+        dsair2.move(level, 2)

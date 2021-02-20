@@ -71,6 +71,8 @@ def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_sh
                     syncBrake(value, brake_status_shared, brake_level_shared)
             if data_type == 'mascon':
                 syncMascon(value, mascon_shared, way_shared)
+            if data_type == 'gpio':
+                pass
     
         # 送信段
         hid.send(speedmeter_shared.value, pressure_shared.value)
@@ -87,7 +89,8 @@ start_pressing_waysw = False
 def syncMascon(mascon_value, mascon_shared, way_shared):
     global start_pressing_waysw
     mascon_level = Mascon.formatValue(mascon_value)
-    # 方向転換スイッチ押下
+    
+    # テスト用方向転換スイッチ押下
     if mascon_level == 99:
         if start_pressing_waysw == False:
             start_pressing_waysw = time.time()
@@ -99,6 +102,7 @@ def syncMascon(mascon_value, mascon_shared, way_shared):
                     way_shared.value = 1
                 start_pressing_waysw = False
         return
+    
     # 不正値の読み飛ばし(0-14)
     if not mascon_level in range(15):
         return

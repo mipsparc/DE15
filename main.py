@@ -8,12 +8,13 @@ from Mascon import Mascon
 import Brake
 from Brake import BrakeStatues
 import HID
-import DSair2_v1
+import DSair2_v2
 import SoundManager
 from multiprocessing import Process, Value
 import time
 import sys
 import os
+from Smooth import Speed
 
 # デバイスファイル(udevファイルを読み込ませていればこのまま)
 hid_port = '/dev/de15_hid'
@@ -66,7 +67,7 @@ DE101 = DE10.DE10()
 if CONTROLLER_CONNECTED:
     is_dcc = True
     addr = 3
-    dsair2 = DSair2_v1.DSair2(dsair2_port, is_dcc, addr)
+    dsair2 = DSair2_v2.DSair2(dsair2_port, is_dcc, addr)
     dsair2.move(0, 1)
 
 # サウンドシステム
@@ -117,7 +118,7 @@ while True:
             if speed <= 0:
                 speed_out = 0
             else:
-                speed_out = speed * 30
+                speed_out = Speed.getValue(kph)
             dsair2.move(speed_out, DE101.getWay())
             last_move = speed == 0
 
@@ -130,7 +131,7 @@ while True:
         last_counter = time.time()
 
     # Ctrl-c押下時
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, SystemError) as e:
         # 終了時に走行が停止して、速度計が0になるようにする
         if CONTROLLER_CONNECTED:
             dsair2.move(0, 0)
@@ -142,9 +143,3 @@ while True:
         time.sleep(0.5)
 
         raise
-    
-# 出力と変換する(値は適当)
-def calcDE15SpeedOut(speed):
-    if speed <= 0:
-        return 0
-    return speed * 20

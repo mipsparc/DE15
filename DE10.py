@@ -23,7 +23,7 @@ class DE10:
         # 非常ブレーキ状態
         self.eb = False
         # 客貨車牽引時の加速度減少(単機: 1)
-        self.freight = 0.7
+        self.freight = 1
         # 目標ブレーキシリンダ圧力
         self.goal_bc = self.BC_MAX
         # 方向 0は切
