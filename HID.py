@@ -88,7 +88,7 @@ def syncBrake(brake_value, brake_status_shared, brake_level_shared):
 start_pressing_waysw = False
 def syncMascon(mascon_value, mascon_shared, way_shared):
     global start_pressing_waysw
-    mascon_level = Mascon.formatValue(mascon_value)
+    mascon_level, way = Mascon.formatValue(mascon_value)
     
     # テスト用方向転換スイッチ押下
     if mascon_level == 99:
@@ -102,14 +102,16 @@ def syncMascon(mascon_value, mascon_shared, way_shared):
                     way_shared.value = 1
                 start_pressing_waysw = False
         return
-    
+        
     # 不正値の読み飛ばし(0-14)
     if not mascon_level in range(15):
         return
     mascon_shared.value = mascon_level
+    way_shared.value = way
     
 if __name__ == '__main__':
     hid = HID('/dev/de15_hid')
     while True:
-        print(hid.readSerial())
+        hid.readSerial()
+        #print(hid.readSerial())
         hid.send(0, 180)

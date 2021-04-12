@@ -138,4 +138,5 @@ if __name__ == '__main__':
     dsair2 = DSair2('/dev/dsair2', True, 3)
     while True:
         level = int(input('level> '))
-        dsair2.move(level, 2)
+        way = int(input('way> '))
+        dsair2.move(level, way)
