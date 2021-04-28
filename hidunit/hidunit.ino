@@ -33,14 +33,12 @@ void setup() {
   pinMode(7, INPUT);
   myServo.attach(A0);
 
-  expander.begin((uint8_t)0x0);
+  expander.begin();
   for (int i = 0; i < 13; i++) {
+    expander.pinMode(i, INPUT);
     expander.pullUp(i, HIGH);
   }
-  for (int i = 13; i < 16; i++) {
-    expander.pinMode(i, OUTPUT);
-    expander.digitalWrite(i, HIGH);
-  }
+  
   dac.begin(MCP4725_address);
 }
 

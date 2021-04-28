@@ -31,6 +31,7 @@ speedmeter_shared = Value('i', 0)
 mascon_shared = Value('i', 0)
 pressure_shared = Value('i', 0)
 way_shared = Value('i', 0)
+gpio_shared = Value('I', 0)
 
 # 引数として接続されていないものを渡す
 # ex) python3 main.py controller hid
@@ -52,10 +53,11 @@ else:
 if 'mascon' in test_params:
     MASCON_CONNECTED = False
     mascon_level = 7
+    way = 1
 
 # HID読み書きプロセス起動
 if HID_CONNECTED:
-    hid_process = Process(target=HID.Worker, args=(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, pressure_shared, way_shared, hid_port))
+    hid_process = Process(target=HID.Worker, args=(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, pressure_shared, way_shared, gpio_shared, hid_port))
     # 親プロセスが死んだら自動的に終了
     hid_process.daemon = True
     hid_process.start()
@@ -80,9 +82,8 @@ while True:
     try:
         # ハードウェアからの入力を共有メモリから取り出す
         if MASCON_CONNECTED:
-            # TODO: 現在はマスコンにレバーサがついているため
             way = way_shared.value
-            mascon_level = mascon_shared.value
+            mascon_level = mascon_shared.value            
         if BRAKE_CONNECTED:
             brake_status = brake_status_shared.value
             brake_level = brake_level_shared.value
@@ -105,6 +106,11 @@ while True:
         pressure_shared.value = int(DE101.getBc())
         
         print('{}km/h  BC: {}'.format(int(kph), int(490 - DE101.getBp())))
+        
+        #TODO まとめる
+        hone = False
+        if gpio_shared.value & 0b100000000 == 0:
+            hone = True
 
         # 音を出す
         Sound.brake(DE101.bc)
@@ -112,6 +118,7 @@ while True:
         Sound.power(mascon_level)
         Sound.joint(speed)
         Sound.run(speed)
+        Sound.hone(hone)
         
         # DSAir2に速度と方向を渡す
         if CONTROLLER_CONNECTED:

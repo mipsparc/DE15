@@ -46,7 +46,7 @@ class HID:
             self.send_rotate = 0
         
 # シリアル通信プロセスのワーカー
-def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, pressure_shared, way_shared, device):
+def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, pressure_shared, way_shared, gpio_shared, device):
     hid = HID(device)
     
     # 10回読み込んでからブレーキを初期化する
@@ -69,7 +69,7 @@ def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_sh
             if data_type == 'mascon':
                 syncMascon(value, mascon_shared, way_shared)
             if data_type == 'gpio':
-                pass
+                gpio_shared.value = int(value)
     
         # 送信段
         hid.send(speedmeter_shared.value, pressure_shared.value)

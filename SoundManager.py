@@ -18,6 +18,8 @@ class SoundManager:
         # 特定のジョイントを通過した車輪の数
         self.joint_count = 0
         self.last_run = False
+        self.hone_state = 0
+        self.hone_time = 0
         
         # 頻繁に鳴る音はボリュームを合わせて1.0を超えないようにする
         self.run_max_volume = 0.3
@@ -26,6 +28,9 @@ class SoundManager:
         self.s.switch.volume(0.2)
         self.s.brake.volume(0.5)
         self.s.brake_fadeout.volume(0.5)
+        self.s.hone_start.volume(0.7)
+        self.s.hone_mid.volume(0.7)
+        self.s.hone_end.volume(0.7)
 
     def brake(self, bc):
         if (not self.last_brake) and bc != self.last_bc:
@@ -83,6 +88,27 @@ class SoundManager:
         if self.last_way != way:
             self.last_way = way
             self.s.switch.play()
+            
+    def hone(self, hone):
+        if self.hone_state == 0:
+            if hone:
+                self.hone_time = time.time()
+                self.s.hone_start.play()
+                self.hone_state = 1
+        elif self.hone_state == 1:
+            if self.hone_time + self.s.hone_start.length() - 0.18 <= time.time():
+                self.s.hone_start.stop()
+                self.s.hone_mid.play()
+                self.hone_state = 2
+        elif self.hone_state == 2:
+            if not hone:
+                self.s.hone_mid.stop()
+                self.s.hone_end.play()
+                self.hone_time = time.time()
+                self.hone_state = 3
+        elif self.hone_state == 3:
+            if self.hone_time + 0.5 <= time.time():
+                self.hone_state = 0
             
     def power(self, mascon_level):        
         if mascon_level in (0, 1):

@@ -23,6 +23,9 @@ class Sounder:
         ])
         self.joint = Sounds(['sound/joint.wav'], False)
         self.run = Sounds(['sound/run.wav'])
+        self.hone_start = Sounds(['sound/hone_start.wav'], False)
+        self.hone_mid = Sounds(['sound/hone_mid.wav'])
+        self.hone_end = Sounds(['sound/hone_end.wav'], False)
 
 class Sounds:
     def __init__(self, paths, loop=True):
@@ -44,3 +47,6 @@ class Sounds:
     def volume(self, v):
         for s in self.sound:
             s.set_volume(v)
+            
+    def length(self):
+        return self.sound[0].get_length()
