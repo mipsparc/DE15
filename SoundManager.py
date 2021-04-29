@@ -107,7 +107,7 @@ class SoundManager:
                 self.hone_time = time.time()
                 self.hone_state = 3
         elif self.hone_state == 3:
-            if self.hone_time + 0.5 <= time.time():
+            if self.hone_time + 0.2 <= time.time():
                 self.hone_state = 0
             
     def power(self, mascon_level):        
