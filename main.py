@@ -15,10 +15,12 @@ import time
 import sys
 import os
 from Smooth import Speed
+from Meter import Meter
 
 # デバイスファイル(udevファイルを読み込ませていればこのまま)
 hid_port = '/dev/de15_hid'
 dsair2_port = '/dev/dsair2'
+meter_port = '/dev/de15_meter'
 
 # 標準エラー出力をログファイルにする
 os.makedirs('log', exist_ok=True)
@@ -27,9 +29,7 @@ sys.stderr = open('log/' + str(int(time.time())) + '.txt', 'w')
 # 共有メモリ作成
 brake_status_shared = Value('i', int(BrakeStatues.FIX))
 brake_level_shared = Value('f', 0.0)
-speedmeter_shared = Value('i', 0)
 mascon_shared = Value('i', 0)
-pressure_shared = Value('i', 0)
 way_shared = Value('i', 0)
 gpio_shared = Value('I', 0)
 
@@ -57,13 +57,15 @@ if 'mascon' in test_params:
 
 # HID読み書きプロセス起動
 if HID_CONNECTED:
-    hid_process = Process(target=HID.Worker, args=(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, pressure_shared, way_shared, gpio_shared, hid_port))
+    hid_process = Process(target=HID.Worker, args=(brake_status_shared, brake_level_shared, mascon_shared, way_shared, gpio_shared, hid_port))
     # 親プロセスが死んだら自動的に終了
     hid_process.daemon = True
     hid_process.start()
 
 # DE10のモデルオブジェクト
 DE101 = DE10.DE10()
+
+meter = Meter(meter_port)
 
 # DSair2(DCCコマンドステーション)
 if CONTROLLER_CONNECTED:
@@ -102,8 +104,8 @@ while True:
                 
         kph = speed * 3600 / 1000
         # 速度計に現在車速を与える
-        speedmeter_shared.value = int(kph)
-        pressure_shared.value = int(DE101.getBc())
+        meter.send(kph, 0)
+        #pressure_shared.value = int(DE101.getBc())
         
         print('{}km/h  BC: {}'.format(int(kph), int(490 - DE101.getBp())))
         
@@ -128,9 +130,6 @@ while True:
                 speed_out = Speed.getValue(kph)
             dsair2.move(speed_out, DE101.getWay())
             last_move = speed == 0
-
-        #if HID_CONNECTED:
-            #meter.send(DE101.bc)
 
         # 0.1秒経過するまで待つ(sleepしないのは、音に影響するため)
         while (time.time() <= last_counter + 0.1):

@@ -1,7 +1,6 @@
 #coding:utf-8
 
 import serial
-import sys
 from Brake import DE15Brake
 from Mascon import Mascon
 from Smooth import Pressure, SpeedMeter
@@ -10,7 +9,6 @@ import time
 # ブレーキ装置、速度計、圧力計などのシリアルI/Oを一括管理する
 class HID:
     def __init__(self, device):
-        self.send_rotate = 0
         # timeoutを設定することで通信エラーを防止する
         try:
             self.ser = serial.Serial(device, timeout=0.1, inter_byte_timeout=0.1, baudrate=19200)
@@ -33,20 +31,9 @@ class HID:
             return [data_type, value]
         except ValueError:
             return False
-                
-    def send(self, speed, pressure):
-        if self.send_rotate == 0:
-            # 速度計への出力
-            speed_out = SpeedMeter.getValue(speed)
-            self.ser.write(f's{speed_out}EOF\n'.encode('ascii'))
-            self.send_rotate += 1
-        elif self.send_rotate == 1:
-            pressure_out = Pressure.getValue(pressure)
-            self.ser.write(f'p{pressure_out}EOF\n'.encode('ascii'))
-            self.send_rotate = 0
         
 # シリアル通信プロセスのワーカー
-def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_shared, pressure_shared, way_shared, gpio_shared, device):
+def Worker(brake_status_shared, brake_level_shared, mascon_shared, way_shared, gpio_shared, device):
     hid = HID(device)
     
     # 10回読み込んでからブレーキを初期化する
@@ -70,9 +57,6 @@ def Worker(brake_status_shared, brake_level_shared, speedmeter_shared, mascon_sh
                 syncMascon(value, mascon_shared, way_shared)
             if data_type == 'gpio':
                 gpio_shared.value = int(value)
-    
-        # 送信段
-        hid.send(speedmeter_shared.value, pressure_shared.value)
         
         time.sleep(0.001)
         
@@ -113,4 +97,3 @@ if __name__ == '__main__':
     while True:
         #hid.readSerial()
         print(hid.readSerial())
-        hid.send(0, 180)
