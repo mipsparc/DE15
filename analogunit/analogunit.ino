@@ -5,9 +5,8 @@
 
 //Servo myServo;
 Adafruit_MCP4725 dac;
-int last_speed = 0;
-int speed_count = 0;
 int last_pressure_angle;
+int speed_value = 0;
 
 void setup() {
   Serial.begin(19200);
@@ -36,19 +35,7 @@ void loop() {
 
   // 速度計にアナログ出力する
   if (input.charAt(0) == 's') {
-    if (last_speed != input_value) {
-      speed_count += 1;
-    } else {
-      speed_count = 0;
-    }
-
-    if (speed_count > 3) {
-      speed_count = 0;
-      dac.setVoltage(input_value, false);
-      last_speed = input_value;
-    }
-
-    return;
+    speed_value = input_value;
   }
 
   // 圧力計サーボに指令する
@@ -58,7 +45,8 @@ void loop() {
       //myServo.writeMicroseconds(pressure_angle);
       last_pressure_angle = pressure_angle;
     }
-
-    return;
   }
+
+  dac.setVoltage(speed_value, false);
+  delay(50);
 }
