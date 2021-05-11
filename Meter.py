@@ -1,9 +1,9 @@
 #coding:utf-8
 
 import serial
-from Smooth import Pressure, SpeedMeter
+from Smooth import SpeedMeter
 
-# ブレーキ装置、速度計、圧力計などのシリアルI/Oを一括管理する
+# 速度計を管理する
 class Meter:
     def __init__(self, device):
         self.send_rotate = 0
@@ -15,15 +15,8 @@ class Meter:
             raise
         
     def send(self, speed, pressure):
-        #if self.send_rotate == 0:
-        # 速度計への出力
         speed_out = SpeedMeter.getValue(speed)
         self._send(f's{speed_out}EOF\n'.encode('ascii'))
-        #self.send_rotate += 1
-        #elif self.send_rotate == 1:
-            #pressure_out = Pressure.getValue(pressure)
-            #self.ser.write(f'p{pressure_out}EOF\n'.encode('ascii'))
-            #self.send_rotate = 0
             
     def _send(self, text):
         self.ser.write(text)

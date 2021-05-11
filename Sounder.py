@@ -26,6 +26,8 @@ class Sounder:
         self.hone_start = Sounds(['sound/hone_start.wav'], False)
         self.hone_mid = Sounds(['sound/hone_mid.wav'])
         self.hone_end = Sounds(['sound/hone_end.wav'], False)
+        self.ding_bell = Sounds(['sound/ding_bell.wav'], False)
+        self.start = Sounds(['sound/start.wav'], False)
 
 class Sounds:
     def __init__(self, paths, loop=True):

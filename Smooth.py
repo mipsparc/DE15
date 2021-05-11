@@ -27,12 +27,34 @@ class Speed(Smooth):
         [999.9, None], #dummy
     ]
 
-class Pressure(Smooth):
-    # BC, サーボusのプロファイル
+class BCToRight(Smooth):
+    # 右回りのBC, サーボusのプロファイル
     PROFILE = [
-        [0.0, 0.0],
-        [100.0, 750.0],
-        [200.0, 1500.0],
+        [0, 1530],
+        [70, 1490],
+        [350, 1460],
+        [999, 1461],
+        [999.9, None], #dummy
+    ]
+    
+class BCToLeft(Smooth):
+    # 左回りのBC, サーボusのプロファイル
+    PROFILE = [
+        [0, 1580],
+        [80, 1560],
+        [210, 1540],
+        [350, 1460],
+        [999, 1461],
+        [999.9, None], #dummy
+    ]
+    
+class BP(Smooth):
+    # BP, サーボusのプロファイル
+    PROFILE = [
+        [0, 1750],
+        [360, 1750],
+        [500, 1680],
+        [999, 1680],
         [999.9, None], #dummy
     ]
 

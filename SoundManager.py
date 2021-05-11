@@ -25,12 +25,12 @@ class SoundManager:
         self.run_max_volume = 0.3
         self.s.power.volume(0.3)
         self.s.joint.volume(0.8)
-        self.s.switch.volume(0.2)
         self.s.brake.volume(0.5)
         self.s.brake_fadeout.volume(0.5)
         self.s.hone_start.volume(0.7)
         self.s.hone_mid.volume(0.7)
         self.s.hone_end.volume(0.7)
+        self.s.start.volume(0.7)
 
     def brake(self, bc):
         if (not self.last_brake) and bc != self.last_bc:
@@ -83,11 +83,12 @@ class SoundManager:
             return
 
         self.s.run.volume(min(speed / 15 * self.run_max_volume, self.run_max_volume))
-
-    def switch(self, way):
-        if self.last_way != way:
-            self.last_way = way
-            self.s.switch.play()
+            
+    def dingBell(self):
+        self.s.ding_bell.play()
+        
+    def startEngine(self):
+        self.s.start.play()
             
     def hone(self, hone):
         if self.hone_state == 0:

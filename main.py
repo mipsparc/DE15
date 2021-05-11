@@ -29,6 +29,7 @@ sys.stderr = open('log/' + str(int(time.time())) + '.txt', 'w')
 # 共有メモリ作成
 brake_status_shared = Value('i', int(BrakeStatues.FIX))
 brake_level_shared = Value('f', 0.0)
+bc_shared = Value('i', 0)
 mascon_shared = Value('i', 0)
 way_shared = Value('i', 0)
 gpio_shared = Value('I', 0)
@@ -57,7 +58,7 @@ if 'mascon' in test_params:
 
 # HID読み書きプロセス起動
 if HID_CONNECTED:
-    hid_process = Process(target=HID.Worker, args=(brake_status_shared, brake_level_shared, mascon_shared, way_shared, gpio_shared, hid_port))
+    hid_process = Process(target=HID.Worker, args=(brake_status_shared, brake_level_shared, bc_shared, mascon_shared, way_shared, gpio_shared, hid_port))
     # 親プロセスが死んだら自動的に終了
     hid_process.daemon = True
     hid_process.start()
@@ -79,6 +80,11 @@ Sound = SoundManager.SoundManager()
 
 # メインループを0.1秒おきに回すためのunix timeカウンタ
 last_counter = time.time()
+
+last_ats_status = 0
+
+Sound.startEngine()
+time.sleep(12)
 
 while True:
     try:
@@ -105,18 +111,35 @@ while True:
         kph = speed * 3600 / 1000
         # 速度計に現在車速を与える
         meter.send(kph, 0)
-        #pressure_shared.value = int(DE101.getBc())
+        bc_shared.value = int(DE101.getBc())
         
-        print('{}km/h  BC: {}'.format(int(kph), int(490 - DE101.getBp())))
+        print('{}km/h  BC: {}'.format(int(kph), DE101.getBc()))
         
-        #TODO まとめる
+        # ホーン
         hone = False
         if gpio_shared.value & 0b100000000 == 0:
             hone = True
+                
+        # ATS
+        if kph <= 50:
+            gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1010
+            if last_ats_status != 0b1010:
+                Sound.dingBell()
+            last_ats_status = 0b1010
+        if kph > 80:
+            gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1011
+            if last_ats_status != 0b1011:
+                Sound.dingBell()
+            last_ats_status = 0b1011
+            DE101.eb = True
+        elif kph > 50:
+            gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1110
+            if last_ats_status != 0b1110:
+                Sound.dingBell()
+            last_ats_status = 0b1110
 
         # 音を出す
         Sound.brake(DE101.bc)
-        Sound.switch(DE101.getWay())
         Sound.power(mascon_level)
         Sound.joint(speed)
         Sound.run(speed)
@@ -137,15 +160,13 @@ while True:
         last_counter = time.time()
 
     # Ctrl-c押下時
-    except (KeyboardInterrupt, SystemError) as e:
+    except Exception as e:
         # 終了時に走行が停止して、速度計が0になるようにする
         if CONTROLLER_CONNECTED:
             dsair2.move(0, 0)
             dsair2.move(0, 0)
-        if HID_CONNECTED:
-            speedmeter_shared.value = 0
-
-        # 速度計0が伝搬するまで待つ
+            
+        gpio_shared.value = 0
         time.sleep(0.5)
 
         raise

@@ -3,7 +3,7 @@
 import serial
 from Brake import DE15Brake
 from Mascon import Mascon
-from Smooth import Pressure, SpeedMeter
+from Smooth import BCToLeft, BCToRight, BP
 import time
 
 # ブレーキ装置、速度計、圧力計などのシリアルI/Oを一括管理する
@@ -16,6 +16,10 @@ class HID:
             print('正常にシリアルポートを開けませんでした。')
             raise
         
+        self.last_sent_ats = 0
+        # 初期値
+        self.last_bc_value = 330
+        
     def readSerial(self):
         raw_value = self.ser.readline()
         try:
@@ -25,19 +29,50 @@ class HID:
             return False
         
         raw_text = raw_text.replace('\r\n', '')
-        
         try:
             data_type, value = raw_text.split(':')
             return [data_type, value]
         except ValueError:
             return False
         
+    def sendATS(self, value):
+        if self.last_sent_ats != value:
+            self.ser.write(f'a{value}EOF\n'.encode('ascii'))
+            self.last_sent_ats = value
+            
+    def setBC(self, bc):
+        if self.last_bc_value == bc:
+            return
+        
+        if self.last_bc_value < bc:
+            self.sendBC(int(BCToRight.getValue(bc)))
+        else:
+            self.sendBC(int(BCToLeft.getValue(bc)))
+
+        self.last_bc_value = bc
+        
+    def setBP(self, bp):
+        self.sendBP(int(BP.getValue(bp)))
+
+    def sendBC(self, value):
+        if 1400 <= value <= 1600:
+            self.ser.write(f'b{value}EOF\n'.encode('ascii'))
+        
+    def sendBP(self, value):
+        if 1670 <= value <= 1760:
+            self.ser.write(f'p{value}EOF\n'.encode('ascii'))
+        
 # シリアル通信プロセスのワーカー
-def Worker(brake_status_shared, brake_level_shared, mascon_shared, way_shared, gpio_shared, device):
+def Worker(brake_status_shared, brake_level_shared, bc_shared, mascon_shared, way_shared, gpio_shared, device):
     hid = HID(device)
     
     # 10回読み込んでからブレーキを初期化する
     init_brake_ref_count = 10
+    
+    # 初期化
+    hid.sendATS(0)
+    
+    last_sent = time.time();
     while True:
         serial = hid.readSerial()
         
@@ -56,8 +91,17 @@ def Worker(brake_status_shared, brake_level_shared, mascon_shared, way_shared, g
             if data_type == 'mascon':
                 syncMascon(value, mascon_shared, way_shared)
             if data_type == 'gpio':
-                gpio_shared.value = int(value)
+                gpio_shared.value = (int(value) & ~0b1111) + (gpio_shared.value & 0b1111)
+                
+        # 送信段
+        ats = gpio_shared.value & 0b1111
+        hid.sendATS(ats)
         
+        if last_sent + 0.3 < time.time():
+            hid.setBC(bc_shared.value)
+            hid.setBP(490 - bc_shared.value)
+            last_sent = time.time()
+            
         time.sleep(0.001)
         
 def syncBrake(brake_value, brake_status_shared, brake_level_shared):
@@ -95,5 +139,11 @@ def syncMascon(mascon_value, mascon_shared, way_shared):
 if __name__ == '__main__':
     hid = HID('/dev/de15_hid')
     while True:
-        #hid.readSerial()
-        print(hid.readSerial())
+        value = int(input('bc> '))
+        #value = 1560
+        hid.sendBC(value)
+        
+        #value = int(input('bp> '))
+        value = 1745
+        hid.sendBP(value)
+        #print(hid.readSerial())

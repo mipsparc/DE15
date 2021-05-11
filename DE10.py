@@ -11,7 +11,7 @@ class DE10:
         # マスコンノッチ(0-14)
         self.mascon_level = 0
         # 非常ブレーキシリンダ圧力
-        self.BC_MAX_EB = 4.0
+        self.BC_MAX_EB = 3.5
         # 常用最大ブレーキシリンダ圧力 本物は5.7kg/cm2
         self.BC_MAX = 3.0
         # ブレーキシリンダ圧力(減速度)
@@ -40,10 +40,8 @@ class DE10:
             accel = self.getSmoothLevel() * 0.803
         elif self.speed < 6.94: # 25kph
             accel = self.getSmoothLevel() * 0.5
-        elif self.speed < 9.72: # 35kph
-            accel = self.getSmoothLevel() * 0.333
         elif self.speed < 12.5: # 45kph
-            accel = self.getSmoothLevel() * 0.222
+            accel = self.getSmoothLevel() * 0.333
         elif self.speed < 23.5: # 84.6kph
             accel = self.getSmoothLevel() * 0.194
         # 最高速度では加速は0になる
@@ -58,7 +56,6 @@ class DE10:
         # ブレーキ装置状態から目標ブレーキシリンダ圧を求める
         if self.brake_status in (BrakeStatues.ERROR_SENSOR, BrakeStatues.ERROR, BrakeStatues.EMER):
             self.eb = True
-            self.goal_bc = self.BC_MAX_EB
         elif self.brake_status in (BrakeStatues.FIX, BrakeStatues.MAX_BRAKE):
             self.goal_bc = self.BC_MAX
         elif self.brake_status == BrakeStatues.BRAKE:
@@ -67,6 +64,14 @@ class DE10:
             self.goal_bc = 0.0
         elif self.brake_status == BrakeStatues.LOWER_BRAKE:
             self.goal_bc = 0.0
+            
+        # 非常ブレーキ
+        if self.eb:
+            self.goal_bc = self.BC_MAX_EB
+            self.setMascon(0)
+            # 停車で復位
+            if self.speed == 0:
+                self.eb = False
 
         # 0.1秒あたりのブレーキ作用・寛解 ここは実物に則さない
         # 目標ブレーキシリンダ圧力を設定すると、ゆっくりとそこに向けて動いていく
@@ -88,16 +93,9 @@ class DE10:
             self.bc = self.BC_MAX_EB
 
         # 加減速計算
-        self.speed = self.speed + (accel - self.bc / 1.5) * 0.1 * self.freight
+        self.speed = self.speed + (accel * 1.3 - self.bc / 1.5) * 0.1 * self.freight
         if self.speed < 0:
             self.speed = 0
-
-        # 非常ブレーキ
-        if self.eb:
-            self.setMascon(0)
-            # 停車で復位
-            if self.speed == 0:
-                self.eb = False
 
     def getSpeed(self):
         return self.speed
@@ -123,12 +121,10 @@ class DE10:
     def setBrakeStatus(self, brake_status):
         self.brake_status = brake_status
     
-    # 実際のブレーキ管圧力を便宜上のブレーキシリンダ圧力値から求める
-    # ブレーキ管圧力は通常490kPa 140kPa減圧して350kPaになると最大がかかる
     def getBp(self):
         return 490 - (self.bc / self.BC_MAX) * 140
 
+    # 実際のブレーキ管圧力を便宜上のブレーキシリンダ圧力値から求める
+    # ブレーキ管圧力は通常490kPa 140kPa減圧して350kPaになると最大がかかる
     def getBc(self):
-        return self.bc
-    
-
+        return (self.bc / self.BC_MAX_EB) * 350 
