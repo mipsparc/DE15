@@ -12,6 +12,9 @@ int ats_status = 0;
 Servo bc_servo;
 Servo bp_servo;
 
+// 最後に指令を受け取ったミリ秒
+unsigned long last_received_time = millis();
+
 void setup() {
   Wire.begin();
   Serial.begin(19200);
@@ -37,13 +40,19 @@ void setup() {
     expander.pullUp(i, HIGH);
   }
 
+  // サーボ無効
+  digitalWrite(14, LOW);
+  
   bc_servo.attach(12);
   bp_servo.attach(11);
-  bc_servo.writeMicroseconds(1560);
-  bp_servo.writeMicroseconds(1745);
 }
 
 void loop() {
+  if (abs(millis() - last_received_time) > 1000) {
+    // サーボ無効
+    digitalWrite(14, LOW);
+  }
+  
   int brake_value = 0;
   String input;
 
@@ -64,8 +73,10 @@ void loop() {
 
     /** 受信段 **/
   input = Serial.readStringUntil('\n');
+
   if (input.indexOf("EOF")) {
     input.replace("EOF", "");
+    last_received_time = millis();
   } else {
     return;
   }
@@ -78,14 +89,14 @@ void loop() {
     ats_status = input_value & 0b1111;
   }
   if (input.charAt(0)== 'b') {
-    //if (1150 <= input_value && input_value <= 1555) {
-      bc_servo.writeMicroseconds(input_value);
-    //}
+    // サーボ有効
+    digitalWrite(14, HIGH);
+    bc_servo.writeMicroseconds(input_value);
   }
   if (input.charAt(0) == 'p') {
-    //if (1360 <= input_value && input_value <= 1460) {
-      bp_servo.writeMicroseconds(input_value);
-    //}
+    // サーボ有効
+    digitalWrite(14, HIGH);
+    bp_servo.writeMicroseconds(input_value);
   }
 }
 

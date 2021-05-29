@@ -41,8 +41,17 @@ class HID:
             self.last_sent_ats = value
             
     def setBC(self, bc):
+        # 表示計器の関係上
+        bc += 20
+        
         if self.last_bc_value == bc:
             return
+        
+        ## 一旦左端にする
+        #if bc < 12 < self.last_bc_value:
+            #self.sendBC(int(BCToLeft.getValue(0)))
+            #last_bc_value = 0
+            #return
         
         if self.last_bc_value < bc:
             self.sendBC(int(BCToRight.getValue(bc)))
@@ -53,13 +62,16 @@ class HID:
         
     def setBP(self, bp):
         self.sendBP(int(BP.getValue(bp)))
+        
+    def setER(self, er):
+        self.sendER(int(ER.getValue(er)))
 
     def sendBC(self, value):
-        if 1400 <= value <= 1600:
+        if 890 <= value <= 1150:
             self.ser.write(f'b{value}EOF\n'.encode('ascii'))
         
     def sendBP(self, value):
-        if 1670 <= value <= 1760:
+        if 1500 <= value <= 1700:
             self.ser.write(f'p{value}EOF\n'.encode('ascii'))
         
 # シリアル通信プロセスのワーカー
@@ -97,7 +109,7 @@ def Worker(brake_status_shared, brake_level_shared, bc_shared, mascon_shared, wa
         ats = gpio_shared.value & 0b1111
         hid.sendATS(ats)
         
-        if last_sent + 0.3 < time.time():
+        if last_sent + 0.1 < time.time():
             hid.setBC(bc_shared.value)
             hid.setBP(490 - bc_shared.value)
             last_sent = time.time()
@@ -139,11 +151,12 @@ def syncMascon(mascon_value, mascon_shared, way_shared):
 if __name__ == '__main__':
     hid = HID('/dev/de15_hid')
     while True:
+        #value = int(input('bp> '))
+        #value = 1600
+        #hid.sendBP(value)
+        
         value = int(input('bc> '))
-        #value = 1560
+        #value = 1400
         hid.sendBC(value)
         
-        #value = int(input('bp> '))
-        value = 1745
-        hid.sendBP(value)
         #print(hid.readSerial())

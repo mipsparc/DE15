@@ -15,12 +15,13 @@ import time
 import sys
 import os
 from Smooth import Speed
-from Meter import Meter
+from HID2 import HID2
+from queue import Queue
 
 # デバイスファイル(udevファイルを読み込ませていればこのまま)
 hid_port = '/dev/de15_hid'
 dsair2_port = '/dev/dsair2'
-meter_port = '/dev/de15_meter'
+hid2_port = '/dev/de15_meter'
 
 # 標準エラー出力をログファイルにする
 os.makedirs('log', exist_ok=True)
@@ -29,7 +30,7 @@ sys.stderr = open('log/' + str(int(time.time())) + '.txt', 'w')
 # 共有メモリ作成
 brake_status_shared = Value('i', int(BrakeStatues.FIX))
 brake_level_shared = Value('f', 0.0)
-bc_shared = Value('i', 0)
+bc_shared = Value('i', 200)
 mascon_shared = Value('i', 0)
 way_shared = Value('i', 0)
 gpio_shared = Value('I', 0)
@@ -66,7 +67,13 @@ if HID_CONNECTED:
 # DE10のモデルオブジェクト
 DE101 = DE10.DE10()
 
-meter = Meter(meter_port)
+hid2 = HID2(hid2_port)
+hid2.setER(50)
+
+# BCをキューにして、遅延させる
+bc_q = Queue(10000)
+for i in range(200, 210):
+    bc_q.put(i)
 
 # DSair2(DCCコマンドステーション)
 if CONTROLLER_CONNECTED:
@@ -109,11 +116,16 @@ while True:
         speed = DE101.getSpeed()
                 
         kph = speed * 3600 / 1000
-        # 速度計に現在車速を与える
-        meter.send(kph, 0)
-        bc_shared.value = int(DE101.getBc())
         
-        print('{}km/h  BC: {}'.format(int(kph), DE101.getBc()))
+        # 速度計に現在車速を与える
+        hid2.setMeter(kph)
+        # 釣り合い管に圧力を与える
+        hid2.setER(490 - int(DE101.getBc()))
+        # BCに圧力を与える(5ループ分遅延させる)
+        bc_q.put(int(DE101.getBc()))
+        bc_shared.value = bc_q.get()
+        
+        print('{}km/h  BC: {}'.format(int(kph), int(DE101.getBc())))
         
         # ホーン
         hone = False
@@ -121,22 +133,25 @@ while True:
             hone = True
                 
         # ATS
-        if kph <= 50:
+        if kph <= 40:
             gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1010
             if last_ats_status != 0b1010:
                 Sound.dingBell()
             last_ats_status = 0b1010
-        if kph > 80:
+        if kph > 45:
             gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1011
             if last_ats_status != 0b1011:
                 Sound.dingBell()
             last_ats_status = 0b1011
             DE101.eb = True
-        elif kph > 50:
+        elif kph > 40:
             gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1110
             if last_ats_status != 0b1110:
                 Sound.dingBell()
             last_ats_status = 0b1110
+        # ブレーキ緩解まで光り続ける
+        if DE101.eb == True:
+            gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1011
 
         # 音を出す
         Sound.brake(DE101.bc)
@@ -161,12 +176,13 @@ while True:
 
     # Ctrl-c押下時
     except Exception as e:
-        # 終了時に走行が停止して、速度計が0になるようにする
+        # 終了時に走行が停止する
         if CONTROLLER_CONNECTED:
             dsair2.move(0, 0)
             dsair2.move(0, 0)
-            
+        
+        bc_shared.value = 340
         gpio_shared.value = 0
-        time.sleep(0.5)
+        time.sleep(1)
 
         raise

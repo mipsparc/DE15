@@ -122,7 +122,8 @@ class DE10:
         self.brake_status = brake_status
     
     def getBp(self):
-        return 490 - (self.bc / self.BC_MAX) * 140
+        # 490から始まって、BCが増えるごとに減る
+        return (self.bc / self.BC_MAX_EB) * -10 + 490 + 10
 
     # 実際のブレーキ管圧力を便宜上のブレーキシリンダ圧力値から求める
     # ブレーキ管圧力は通常490kPa 140kPa減圧して350kPaになると最大がかかる
