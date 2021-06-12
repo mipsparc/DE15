@@ -1,3 +1,6 @@
+# 動作風景(YouTube)
+[![](https://img.youtube.com/vi/OERTGuoC9UQ/0.jpg)](https://www.youtube.com/watch?v=OERTGuoC9UQ)
+
 # 概要
 - このソフトウェア群は、実物部品を使ったDE15運転台をリアルに制御するシミュレータシステムです。
 - DesktopStation様のDSAir2などを使用して、DCC・アナログ鉄道模型を制御することもできます。
