@@ -42,16 +42,10 @@ class HID:
             
     def setBC(self, bc):
         # 表示計器の関係上
-        bc += 20
+        bc += 30
         
         if self.last_bc_value == bc:
             return
-        
-        ## 一旦左端にする
-        #if bc < 12 < self.last_bc_value:
-            #self.sendBC(int(BCToLeft.getValue(0)))
-            #last_bc_value = 0
-            #return
         
         if self.last_bc_value < bc:
             self.sendBC(int(BCToRight.getValue(bc)))
@@ -71,7 +65,7 @@ class HID:
             self.ser.write(f'b{value}EOF\n'.encode('ascii'))
         
     def sendBP(self, value):
-        if 1500 <= value <= 1700:
+        if 1300 <= value <= 1700:
             self.ser.write(f'p{value}EOF\n'.encode('ascii'))
         
 # シリアル通信プロセスのワーカー
@@ -151,12 +145,12 @@ def syncMascon(mascon_value, mascon_shared, way_shared):
 if __name__ == '__main__':
     hid = HID('/dev/de15_hid')
     while True:
-        #value = int(input('bp> '))
+        value = int(input('bp> '))
         #value = 1600
-        #hid.sendBP(value)
+        hid.sendBP(value)
         
-        value = int(input('bc> '))
+        #value = int(input('bc> '))
         #value = 1400
-        hid.sendBC(value)
+        #hid.sendBC(value)
         
         #print(hid.readSerial())

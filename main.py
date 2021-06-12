@@ -17,6 +17,7 @@ import os
 from Smooth import Speed
 from HID2 import HID2
 from queue import Queue
+import LogRotate
 
 # デバイスファイル(udevファイルを読み込ませていればこのまま)
 hid_port = '/dev/de15_hid'
@@ -26,6 +27,7 @@ hid2_port = '/dev/de15_meter'
 # 標準エラー出力をログファイルにする
 os.makedirs('log', exist_ok=True)
 sys.stderr = open('log/' + str(int(time.time())) + '.txt', 'w')
+LogRotate.rotate()
 
 # 共有メモリ作成
 brake_status_shared = Value('i', int(BrakeStatues.FIX))
@@ -70,9 +72,9 @@ DE101 = DE10.DE10()
 hid2 = HID2(hid2_port)
 hid2.setER(50)
 
-# BCをキューにして、遅延させる
+# BCをキューにして、1.5秒(15フレーム)遅延させる
 bc_q = Queue(10000)
-for i in range(200, 210):
+for i in range(200, 215):
     bc_q.put(i)
 
 # DSair2(DCCコマンドステーション)
