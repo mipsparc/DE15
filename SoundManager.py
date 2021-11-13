@@ -9,6 +9,8 @@ class SoundManager:
         self.s = Sounder.Sounder()
         self.last_brake = False
         self.last_bc = 0
+        # ブレーキングしているループ数
+        self.braking_count = 0
         self.last_way = 0
         self.power_num = 99 # dummy
         # 最後にジョイントを先頭の車輪が通過したUNIX TIME
@@ -22,7 +24,7 @@ class SoundManager:
         self.hone_time = 0
         
         # 頻繁に鳴る音はボリュームを合わせて1.0を超えないようにする
-        self.run_max_volume = 0.3
+        self.run_max_volume = 0.4
         self.s.power.volume(0.3)
         self.s.joint.volume(0.8)
         self.s.brake.volume(0.5)
@@ -34,9 +36,12 @@ class SoundManager:
 
     def brake(self, bc):
         if (not self.last_brake) and bc != self.last_bc:
-            self.last_brake = True
-            self.s.brake.play()
+            self.braking_count += 1
+            if self.braking_count > 5: 
+                self.last_brake = True
+                self.s.brake.play()
         elif self.last_brake and bc == self.last_bc:
+            self.braking_count = 0
             self.last_brake = False
             self.s.brake.stop()
             self.s.brake_fadeout.play()

@@ -78,6 +78,9 @@ def Worker(brake_status_shared, brake_level_shared, bc_shared, mascon_shared, wa
     # 初期化
     hid.sendATS(0)
     
+    # GPIOデータがまだ到着していないときのダミー
+    gpio_shared.value = 9999
+    
     last_sent = time.time();
     while True:
         serial = hid.readSerial()

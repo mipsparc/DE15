@@ -36,6 +36,7 @@ bc_shared = Value('i', 200)
 mascon_shared = Value('i', 0)
 way_shared = Value('i', 0)
 gpio_shared = Value('I', 0)
+gpio_ready = False
 
 # 引数として接続されていないものを渡す
 # ex) python3 main.py controller hid
@@ -109,6 +110,9 @@ while True:
             print('HIDプロセスが停止しています')
             raise SystemError
         
+        if gpio_shared != 9999:
+            gpio_ready = True
+        
         # DE10モデルオブジェクトに入力を与える
         DE101.setWay(way)
         DE101.setMascon(mascon_level)
@@ -129,31 +133,34 @@ while True:
         
         print('{}km/h  BC: {}'.format(int(kph), int(DE101.getBc())))
         
-        # ホーン
-        hone = False
-        if gpio_shared.value & 0b100000000 == 0:
-            hone = True
-                
-        # ATS
-        if kph <= 40:
-            gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1010
-            if last_ats_status != 0b1010:
-                Sound.dingBell()
-            last_ats_status = 0b1010
-        if kph > 45:
-            gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1011
-            if last_ats_status != 0b1011:
-                Sound.dingBell()
-            last_ats_status = 0b1011
-            DE101.eb = True
-        elif kph > 40:
-            gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1110
-            if last_ats_status != 0b1110:
-                Sound.dingBell()
-            last_ats_status = 0b1110
-        # ブレーキ緩解まで光り続ける
-        if DE101.eb == True:
-            gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1011
+        if gpio_ready:
+            # ホーン
+            hone = False
+            if gpio_shared.value & 0b100000000 == 0:
+                hone = True
+                    
+            # ATS-P 通常時
+            if kph <= 70:
+                gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1010
+                if last_ats_status != 0b1010:
+                    Sound.dingBell()
+                last_ats_status = 0b1010
+            # ATS-P ブレーキ動作
+            if kph > 75:
+                gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1011
+                if last_ats_status != 0b1011:
+                    Sound.dingBell()
+                last_ats_status = 0b1011
+                DE101.eb = True
+            # ATS-P パターン接近
+            elif kph > 70:
+                gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1110
+                if last_ats_status != 0b1110:
+                    Sound.dingBell()
+                last_ats_status = 0b1110
+            # ブレーキ緩解まで光り続ける
+            if DE101.eb == True:
+                gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1011
 
         # 音を出す
         Sound.brake(DE101.bc)
