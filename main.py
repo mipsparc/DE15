@@ -71,7 +71,6 @@ if HID_CONNECTED:
 DE101 = DE10.DE10()
 
 hid2 = HID2(hid2_port)
-hid2.setER(50)
 
 # BCをキューにして、1.5秒(15フレーム)遅延させる
 bc_q = Queue(10000)

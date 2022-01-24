@@ -76,7 +76,7 @@ def Worker(brake_status_shared, brake_level_shared, bc_shared, mascon_shared, wa
     init_brake_ref_count = 10
     
     # 初期化
-    hid.sendATS(0)
+    hid.sendATS(0b1111)
     
     # GPIOデータがまだ到着していないときのダミー
     gpio_shared.value = 9999

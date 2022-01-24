@@ -87,13 +87,12 @@ class DE10:
         self.bc = round(self.bc, 2)
         
         # 走行抵抗
-        if self.bc < 0.1:
-            self.bc = 0.1
-        elif self.bc > self.BC_MAX_EB:
+        if self.bc > self.BC_MAX_EB:
             self.bc = self.BC_MAX_EB
 
         # 加減速計算
-        self.speed = self.speed + (accel * 1.3 - self.bc / 1.5) * 0.1 * self.freight
+        # bcに0.1足してるのは走行抵抗
+        self.speed = self.speed + (accel * 1.3 - (self.bc + 0.1) / 1.5) * 0.1 * self.freight
         if self.speed < 0:
             self.speed = 0
 
@@ -128,4 +127,7 @@ class DE10:
     # 実際のブレーキ管圧力を便宜上のブレーキシリンダ圧力値から求める
     # ブレーキ管圧力は通常490kPa 140kPa減圧して350kPaになると最大がかかる
     def getBc(self):
-        return (self.bc / self.BC_MAX_EB) * 350 
+        bc = (self.bc / self.BC_MAX_EB) * 350 
+        if bc < 10:
+            return 0
+        return bc

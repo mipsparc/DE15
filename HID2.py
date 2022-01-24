@@ -1,12 +1,12 @@
 #coding:utf-8
 
 import serial
-from Smooth import SpeedMeter, ERToRight, ERToLeft
+from Smooth import SpeedMeter, ER
+import time
 
 # 速度計を管理する
 class HID2:
     def __init__(self, device):
-        self.send_rotate = 0
         # timeoutを設定することで通信エラーを防止する
         try:
             self.ser = serial.Serial(device, timeout=0.1, inter_byte_timeout=0.1, baudrate=19200)
@@ -15,6 +15,7 @@ class HID2:
             raise
         
         self.last_er = 0
+        self.last_er_time = time.time()
         
     def setMeter(self, speed):
         speed_out = SpeedMeter.getValue(speed)
@@ -24,18 +25,13 @@ class HID2:
         self._send(f's{speed_out}EOF\n'.encode('ascii'))
     
     # 釣り合い管
-    def setER(self, er):
-        if self.last_er == er:
-            return;
-        
-        if self.last_er < er:
-            self._sendER(int(ERToRight.getValue(er)))
-        else:
-            self._sendER(int(ERToLeft.getValue(er)))
+    def setER(self, er):      
+        if time.time() - self.last_er_time > 0.3:
+            self._sendER(int(ER.getValue(er)))
         self.last_er = er
 
     def _sendER(self, pressure_out):
-        if 1400 <= pressure_out <= 1800:
+        if 600 <= pressure_out <= 2000:
             self._send(f'e{pressure_out}EOF\n'.encode('ascii'))
 
     def _send(self, text):
