@@ -26,7 +26,7 @@ class HID2:
     
     # 釣り合い管
     def setER(self, er):      
-        if time.time() - self.last_er_time > 0.3:
+        if self.last_er != er:
             self._sendER(int(ER.getValue(er)))
         self.last_er = er
 
