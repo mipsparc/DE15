@@ -134,9 +134,9 @@ while True:
         
         # socketでBVEに車速を送る
         if way == 1:
-            sock.sendto(('setspeed ' + str(int(speed * 3.5))).encode('ascii'), dst)
+            sock.sendto(('setspeed ' + str(int(kph))).encode('ascii'), dst)
         elif way == 2:
-            sock.sendto(('setspeed -' + str(int(speed * 3.5))).encode('ascii'), dst)
+            sock.sendto(('setspeed -' + str(int(kph))).encode('ascii'), dst)
         
         # 速度計に現在車速を与える
         hid2.setMeter(kph)
