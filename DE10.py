@@ -11,9 +11,9 @@ class DE10:
         # マスコンノッチ(0-14)
         self.mascon_level = 0
         # 非常ブレーキシリンダ圧力
-        self.BC_MAX_EB = 3.5
+        self.BC_MAX_EB = 3.0
         # 常用最大ブレーキシリンダ圧力 本物は5.7kg/cm2
-        self.BC_MAX = 3.0
+        self.BC_MAX = 2.3
         # ブレーキシリンダ圧力(減速度)
         self.bc = self.BC_MAX
         # ブレーキ装置状態
@@ -37,13 +37,13 @@ class DE10:
     def advanceTime(self):
         # 加速度を求める(m/s2)
         if self.speed < 3.33: # 12kph
-            accel = self.getSmoothLevel() * 0.803
+            accel = self.getSmoothLevel() * 0.9
         elif self.speed < 6.94: # 25kph
-            accel = self.getSmoothLevel() * 0.5
+            accel = self.getSmoothLevel() * 0.7
         elif self.speed < 12.5: # 45kph
-            accel = self.getSmoothLevel() * 0.333
+            accel = self.getSmoothLevel() * 0.5
         elif self.speed < 23.5: # 84.6kph
-            accel = self.getSmoothLevel() * 0.194
+            accel = self.getSmoothLevel() * 0.3
         # 最高速度では加速は0になる
         else:
             accel = 0

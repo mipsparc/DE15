@@ -40,9 +40,9 @@ class HID2:
 if __name__ == '__main__':
     hid2 = HID2('/dev/de15_meter')
     while True:
-        #speed_out = int(input('speed: '))
-        #hid2._send(f's{speed_out}EOF\n'.encode('ascii'))
+        speed_out = int(input('speed: '))
+        hid2._send(f's{speed_out}EOF\n'.encode('ascii'))
         
-        value = int(input('er> '))
+        #value = int(input('er> '))
         #value = 1500
-        hid2._sendER(value)
+        #hid2._sendER(value)

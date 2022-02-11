@@ -90,7 +90,17 @@ Sound = SoundManager.SoundManager()
 # メインループを0.1秒おきに回すためのunix timeカウンタ
 last_counter = time.time()
 
+# ATSの2進での点灯設定
 last_ats_status = 0
+# ATSの最初の地上子までの距離(10m)
+until_ats_point = 10
+
+# BVEに車速を送る
+import socket
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+dst = ('192.168.3.193', 10492)
+sock.sendto(b'setspeedauto 1', dst)
+sock.sendto(b'zeroaxis', dst)
 
 Sound.startEngine()
 time.sleep(12)
@@ -122,6 +132,12 @@ while True:
                 
         kph = speed * 3600 / 1000
         
+        # socketでBVEに車速を送る
+        if way == 1:
+            sock.sendto(('setspeed ' + str(int(speed * 3.5))).encode('ascii'), dst)
+        elif way == 2:
+            sock.sendto(('setspeed -' + str(int(speed * 3.5))).encode('ascii'), dst)
+        
         # 速度計に現在車速を与える
         hid2.setMeter(kph)
         # 釣り合い管に圧力を与える
@@ -132,34 +148,38 @@ while True:
         
         print('{}km/h  BC: {}'.format(int(kph), int(DE101.getBc())))
         
+        if until_ats_point > 0:
+            until_ats_point -= speed / 10.0
+        
         if gpio_ready:
             # ホーン
             hone = False
             if gpio_shared.value & 0b100000000 == 0:
                 hone = True
-                    
-            # ATS-P 通常時
-            if kph <= 70:
-                gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1010
-                if last_ats_status != 0b1010:
-                    Sound.dingBell()
-                last_ats_status = 0b1010
-            # ATS-P ブレーキ動作
-            if kph > 75:
-                gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1011
-                if last_ats_status != 0b1011:
-                    Sound.dingBell()
-                last_ats_status = 0b1011
-                DE101.eb = True
-            # ATS-P パターン接近
-            elif kph > 70:
-                gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1110
-                if last_ats_status != 0b1110:
-                    Sound.dingBell()
-                last_ats_status = 0b1110
-            # ブレーキ緩解まで光り続ける
-            if DE101.eb == True:
-                gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1011
+            
+            if until_ats_point <= 0:
+                # ATS-P 通常時
+                if kph <= 75:
+                    gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1010
+                    if last_ats_status != 0b1010:
+                        Sound.dingBell()
+                    last_ats_status = 0b1010
+                # ATS-P ブレーキ動作
+                if kph > 80:
+                    gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1011
+                    if last_ats_status != 0b1011:
+                        Sound.dingBell()
+                    last_ats_status = 0b1011
+                    DE101.eb = True
+                # ATS-P パターン接近
+                elif kph > 76:
+                    gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1110
+                    if last_ats_status != 0b1110:
+                        Sound.dingBell()
+                    last_ats_status = 0b1110
+                # ブレーキ緩解まで光り続ける
+                if DE101.eb == True:
+                    gpio_shared.value = (gpio_shared.value & ~0b1111) + 0b1011
 
         # 音を出す
         Sound.brake(DE101.bc)
