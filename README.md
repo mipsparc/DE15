@@ -1,9 +1,9 @@
 # 動作風景(YouTube)
-[![](https://img.youtube.com/vi/OERTGuoC9UQ/0.jpg)](https://www.youtube.com/watch?v=OERTGuoC9UQ)
+[![](https://img.youtube.com/vi/yUjAlZOuuAE/0.jpg)](https://www.youtube.com/watch?v=yUjAlZOuuAE)
 
 # 概要
 - このソフトウェア群は、実物部品を使ったDE15運転台をリアルに制御するシミュレータシステムです。
-- DesktopStation様のDSAir2などを使用して、DCC・アナログ鉄道模型を制御することもできます。
+- BVEと連携して、映像を表示することもできます。
 
 # 起動方法
 - メニューからターミナルエミュレータを起動
@@ -20,7 +20,6 @@
 - `pip3 install pygame`
 - `git clone git@github.com:mipsparc/DE15.git`
 - `cd DE15`
-- `python3 main.py hid mascon controller` で単体起動試験をする
 - udevでデバイスファイルを割り当てる。 `sudo cp udev_rules/* /etc/udev/rules.d/`
 - コンピュータを再起動する
 - ターミナルを開いて `cd DE15`
