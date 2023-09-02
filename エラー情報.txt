@@ -1,0 +1,24 @@
+Process Process-1:
+Traceback (most recent call last):
+  File "/home/mipsparc/Dropbox/python/DE15/HID.py", line 87, in Worker
+    serial = hid.readSerial()
+  File "/home/mipsparc/Dropbox/python/DE15/HID.py", line 25, in readSerial
+    raw_value = self.ser.readline()
+  File "/home/mipsparc/.local/lib/python3.10/site-packages/serial/serialposix.py", line 595, in read
+    raise SerialException(
+serial.serialutil.SerialException: device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/usr/lib/python3.10/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/mipsparc/Dropbox/python/DE15/HID.py", line 90, in Worker
+    except (serial.serialutil.SerialException, SystemError):
+AttributeError: 'bool' object has no attribute 'serialutil'
+Traceback (most recent call last):
+  File "/home/mipsparc/Dropbox/python/DE15/main.py", line 108, in <module>
+    raise SystemError
+SystemError

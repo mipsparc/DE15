@@ -23,7 +23,7 @@ class DE10:
         # 非常ブレーキ状態
         self.eb = False
         # 客貨車牽引時の加速度減少(単機: 1)
-        self.freight = 1
+        self.freight = 0.85
         # 目標ブレーキシリンダ圧力
         self.goal_bc = self.BC_MAX
         # 方向 0は切
@@ -37,13 +37,13 @@ class DE10:
     def advanceTime(self):
         # 加速度を求める(m/s2)
         if self.speed < 3.33: # 12kph
-            accel = self.getSmoothLevel() * 0.9
+            accel = self.getSmoothLevel() * 0.6
         elif self.speed < 6.94: # 25kph
-            accel = self.getSmoothLevel() * 0.7
-        elif self.speed < 12.5: # 45kph
             accel = self.getSmoothLevel() * 0.5
+        elif self.speed < 12.5: # 45kph
+            accel = self.getSmoothLevel() * 0.4
         elif self.speed < 23.5: # 84.6kph
-            accel = self.getSmoothLevel() * 0.3
+            accel = self.getSmoothLevel() * 0.2
         # 最高速度では加速は0になる
         else:
             accel = 0
@@ -79,20 +79,19 @@ class DE10:
         if abs(self.bc - self.goal_bc) < 0.1:
             self.goal_bc = self.bc
         elif self.bc > self.goal_bc:
-            self.bc -= (self.bc - self.goal_bc) / 5.0
+            self.bc -= (self.bc - self.goal_bc) / 10.0
         elif self.bc < self.goal_bc:
-            self.bc += (self.goal_bc - self.bc) / 5.0
+            self.bc += (self.goal_bc - self.bc) / 10.0
         
         # 丸める
         self.bc = round(self.bc, 2)
         
-        # 走行抵抗
         if self.bc > self.BC_MAX_EB:
             self.bc = self.BC_MAX_EB
 
         # 加減速計算
-        # bcに0.1足してるのは走行抵抗
-        self.speed = self.speed + (accel * 1.3 - (self.bc + 0.1) / 1.5) * 0.1 * self.freight
+        # bcに0.05足してるのは走行抵抗
+        self.speed = self.speed + (accel * 1.3 - (self.bc + 0.05) / 1.5) * 0.1 * self.freight
         if self.speed < 0:
             self.speed = 0
 
